@@ -458,6 +458,8 @@
 
     let b64 = btoa(JSON.stringify(query))
     let url = window.bobNode + b64
+
+    console.log(url)
     let header
     if (window.bitdbApiKey) {
       header = {

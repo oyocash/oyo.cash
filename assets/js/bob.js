@@ -411,6 +411,7 @@ var searchQueryCreator = function(searchPhrase, beginTimestamp, endTimestamp) {
     if (match && match[1]) {
       let endDate = new Date(Date.UTC(match[1].substring(0,4), parseInt(match[1].substring(4,6)) - 1, match[1].substring(6,8), 23, 59, 59, 0))
       endTimestamp = parseInt(endDate.getTime() / 1000) + 1
+      beginTimestamp = parseInt(endTimestamp - window.oyoProRankingPeriod)
       matchPhrase = matchPhrase.replace(/(?:^|\s+)datetime:\s*\S+\s*/gu, ' ')
     }
   }
