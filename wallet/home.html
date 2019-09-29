@@ -1,0 +1,201 @@
+<html>
+<head>
+  <title>Oyo.cash - Wallet</title>
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:creator" content="@pmitchev" />
+  <meta name="twitter:title" content="Oyo.cash - Wallet" />
+  <meta name="twitter:description" content="Oyo wallet. Receive and send BSV" />
+  <meta name="twitter:image" content="https://oyo.cash/assets/images/logo-large.png" />
+  <meta property="og:url" content="https://oyo.cash/wallet/" />
+  <meta property="og:type"   content="website" />
+  <meta property="og:title" content="Oyo.cash - Wallet" />
+  <meta property="og:description" content="Oyo wallet. Receive and send BSV" />
+  <meta property="og:image" content="https://oyo.cash/assets/images/logo-large.png" />
+
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  <link rel="apple-touch-icon" sizes="57x57" href="/assets/icons/apple-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="/assets/icons/apple-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/assets/icons/apple-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/assets/icons/apple-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="/assets/icons/apple-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="/assets/icons/apple-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/assets/icons/apple-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/assets/icons/apple-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-icon-180x180.png">
+  <link rel="icon" type="image/png" sizes="192x192"  href="/assets/icons/android-icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/assets/icons/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
+  <link rel="manifest" href="/assets/icons/manifest.json">
+  <meta name="msapplication-TileColor" content="#ffffff">
+  <meta name="msapplication-TileImage" content="/assets/icons/ms-icon-144x144.png">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="bitcoin-address" content="1JFAFvfWZauvVWKFsFtVomEQrPAHqEr1X8">
+
+  <script type="text/javascript" src="https://unpkg.com/bsv@0.30.0/bsv.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+  <script src='https://unpkg.com/datapay@0.0.15/dist/datapay.min.js'></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.min.js" integrity="sha256-u6BamZiW5tCemje2nrteKC2KoLIKX9lKPSpvCkOhamw=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/aes.min.js" integrity="sha256-x4ioj4Ml0BqGJWXqHZVljtkzcsm1wHYSD71Boze2cks=" crossorigin="anonymous"></script>
+  <script src="/assets/js/loader.js"></script>
+  <script src="/assets/js/loadVars.js"></script>
+  <script src="/assets/js/common.js"></script>
+  <script src="/assets/js/wallet.js"></script>
+  <script src="/assets/vendors/buffer.js"></script>
+</head>
+<body>
+  <noscript>Oyo Wallet - Home</noscript>
+  <div id="app" class="container">
+    <div id="nav"></div>
+    <div class="grid s_results">
+      <div class="walletNavSection">
+        <div class="walletNav">
+          <div class="walletNavLeft">
+            <button onclick="window.location.href = '/wallet/showPrivateKey.html'">Show private key</button>
+            <button onclick="logout();window.location.href = '/wallet/'">Logout</button>
+          </div>
+          <div class="walletNavCenter">
+          </div>
+          <div class="walletNavRight">
+          </div>
+        </div>
+      </div>
+      <div class="walletInfoSection">
+        <div id="balance" class="section-card">
+          <div class="side-bar"></div>
+          <div class="content">
+            <div class="card-title">Balance</div>
+            <div id="balanceValue" class="user-currency-amount"></div>
+          </div>
+        </div>
+        <div id="depositAddress" class="section-card">
+          <div class="side-bar"></div>
+          <div class="content">
+            <div class="card-title">Your deposit address</div>
+            <canvas id="qr"></canvas>
+            <div id="depositAddressText"></div>
+          </div>
+        </div>
+        <div id="depositAddress" class="section-card">
+          <div class="side-bar"></div>
+          <div class="content">
+            <div class="card-title">Send money</div>
+            <div class="form">
+              <div id="sendError" style="color:#f11;font-size:small"></div>
+              <div id="sendSuccess" style="color:#11f;font-size:small"></div>
+              <div class="field-block field-block-card">
+                <input type="text" name="txReceiverAddress" id="txReceiverAddress" placeholder="Address" required autocomplete="off">
+              </div>
+              <div class="field-block field-block-card">
+                <input type="text" name="txSendAmount" id="txSendAmount" placeholder="Amount (satoshis)" onchange="populateAmountBSV()" onkeypress="this.onchange();" onpaste="this.onchange();" oninput="this.onchange();" required autocomplete="off">
+                <div style="color:#666;font-size:small" id="amountBSV"></div>
+              </div>
+              <div class="field-block field-block-card">
+                <input type="text" name="txOpReturnItem" id="txOpReturnItem" placeholder="Message" autocomplete="off">
+                <div id="txOpReturnText" style="color:#666;font-size:small"></div>
+                <div style="margin-top: 8px; ">
+                  <a href="javascript:void(0);" onclick="addToOpReturn()">[Add]</a> <a href="javascript:void(0);" onclick="deleteOpReturn()">[Remove]</a>
+                </div>
+              </div>
+              <div class="form-buttons" style="text-align: center">
+                <input value="Send" type="submit" onclick="sendTx()">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="walletTransactionsSection">
+
+      </div>
+    </div>
+    <div id="footer"></div>
+  </div>
+
+  <!-- Pin Modal -->
+  <div id="pinModal"></div>
+
+<script language='javascript'>
+  var txOpReturn = []
+  var balanceSat
+  var Buffer = buffer.Buffer
+  // init wallet
+  initWallet (Buffer, CryptoJS, datapay, window.blockExplorerRpc)
+  function populateAmountBSV () {
+    document.getElementById('amountBSV').innerHTML = (document.getElementById('txSendAmount').value / 100000000) + " BSV"
+  }
+  function addToOpReturn () {
+    var txOpReturnItem = document.getElementById('txOpReturnItem')
+    if (txOpReturnItem.value !== null) {
+      txOpReturn.push(txOpReturnItem.value)
+      txOpReturnItem.value = null
+    }
+    document.getElementById('txOpReturnText').innerHTML = JSON.stringify(txOpReturn)
+  }
+  function deleteOpReturn () {
+    txOpReturn = []
+    document.getElementById('txOpReturnText').innerHTML = ""
+  }
+  function enterPin () {
+    document.getElementById('pinError').innerHTML = ""
+    var pin = document.getElementById('pin').value
+    var rememberPin= document.getElementById('rememberPin').value
+    if (rememberPin) {
+      localStorage.setItem('user.pin', pin)
+    } else {
+      sessionStorage.setItem('user.pin', pin)
+    }
+    
+    if (addressFromPrivateKey() === undefined || getAddress() != addressFromPrivateKey()) {
+      document.getElementById('pinError').innerHTML = "Incorrect pin"
+      sessionStorage.removeItem('user.pin')
+      localStorage.removeItem('user.pin')
+      document.getElementById('pin').value = ''
+      return
+    }
+    closeModal('pinModal')
+  }
+  function sendTx () {
+    if (!loggedSpendMode()) {
+      openModal('pinModal')
+    }
+    document.getElementById('sendError').innerHTML = ""
+    document.getElementById('sendSuccess').innerHTML = ""
+    let toArray = []
+    let toElement = {}
+    toElement['address'] = document.getElementById('txReceiverAddress').value
+    toElement['value'] = parseInt(document.getElementById('txSendAmount').value)
+    toArray.push(toElement)
+
+    sendTransaction(txOpReturn, toArray, balanceSat).then(function(r) {
+      document.getElementById('sendSuccess').innerHTML = r
+    }).catch(error => {
+      document.getElementById('sendError').innerHTML = error
+    })
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    if (!(loggedViewMode() || loggedSpendMode())) {
+      window.location.href = '/wallet/login.html'
+    }
+    loadHead()
+    loadNav().then(function(r) {
+      navSearchPerformed()
+    })
+    loadFooter()
+    loadWalletPinModal()
+
+    var receiverAddress = getAddress()
+    var qr = new QRious({
+      element: document.getElementById('qr'),
+      size: 250,
+      value: receiverAddress
+    });
+    document.getElementById('depositAddressText').innerHTML = receiverAddress
+    getAddressInfo(datapay.connect(window.blockExplorerRpc)).then(function(r) {
+      document.getElementById('balanceValue').innerHTML = (r.balanceSat / 100000000) + " BSV"
+      balanceSat = r.balanceSat
+    })
+  })
+</script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<html>
+<head>
+  <title>Oyo Wallet - Show private key</title>
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:creator" content="@pmitchev" />
+  <meta name="twitter:title" content="Oyo.cash - Wallet" />
+  <meta name="twitter:description" content="Oyo wallet. Receive and send BSV" />
+  <meta name="twitter:image" content="https://oyo.cash/assets/images/logo-large.png" />
+  <meta property="og:url" content="https://oyo.cash/wallet/" />
+  <meta property="og:type"   content="website" />
+  <meta property="og:title" content="Oyo.cash - Wallet" />
+  <meta property="og:description" content="Oyo wallet. Receive and send BSV" />
+  <meta property="og:image" content="https://oyo.cash/assets/images/logo-large.png" />
+
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  <link rel="apple-touch-icon" sizes="57x57" href="/assets/icons/apple-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="/assets/icons/apple-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/assets/icons/apple-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/assets/icons/apple-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="/assets/icons/apple-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="/assets/icons/apple-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/assets/icons/apple-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/assets/icons/apple-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-icon-180x180.png">
+  <link rel="icon" type="image/png" sizes="192x192"  href="/assets/icons/android-icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/assets/icons/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
+  <link rel="manifest" href="/assets/icons/manifest.json">
+  <meta name="msapplication-TileColor" content="#ffffff">
+  <meta name="msapplication-TileImage" content="/assets/icons/ms-icon-144x144.png">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="bitcoin-address" content="1JFAFvfWZauvVWKFsFtVomEQrPAHqEr1X8">
+
+  <script type="text/javascript" src="https://unpkg.com/bsv@0.30.0/bsv.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+  <script src='https://unpkg.com/datapay@0.0.15/dist/datapay.min.js'></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.min.js" integrity="sha256-u6BamZiW5tCemje2nrteKC2KoLIKX9lKPSpvCkOhamw=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/aes.min.js" integrity="sha256-x4ioj4Ml0BqGJWXqHZVljtkzcsm1wHYSD71Boze2cks=" crossorigin="anonymous"></script>
+  <script src="/assets/js/loader.js"></script>
+  <script src="/assets/js/loadVars.js"></script>
+  <script src="/assets/js/common.js"></script>
+  <script src="/assets/js/wallet.js"></script>
+  <script src="/assets/vendors/buffer.js"></script>
+</head>
+<body>
+  <noscript>Oyo Wallet - Show private key</noscript>
+  <div id="app" class="container">
+    <div id="nav"></div>
+    <div class="grid">
+      <div class="s_results">
+        <div class="walletNavSection">
+          <div class="walletNav">
+            <div class="walletNavLeft">
+              <button onclick="/wallet/home.html">Home</button>
+              <button onclick="logout();window.location.href = '/wallet/'">Logout</button>
+            </div>
+            <div class="walletNavCenter">
+            </div>
+            <div class="walletNavRight">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="s_results">
+        <div>
+          <h3>Raw format</h3>
+          <canvas id="qrPrivateKeyRaw"></canvas>
+          <p id="privateKeyRaw"></p>
+        </div>
+        <div>
+          <h3>WIF format (compressed)</h3>
+          <canvas id="qrPrivateKeyWIF"></canvas>
+          <p id="privateKeyWIF"></p>
+          </div>
+        <p style="padding-bottom:20px"></p>
+      </div>
+    </div>
+    <div id="footer"></div>
+  </div>
+
+  <!-- Pin Modal -->
+  <div id="pinModal"></div>
+
+<script language='javascript'>
+  var Buffer = buffer.Buffer
+  // init wallet
+  initWallet (Buffer, CryptoJS, datapay, window.blockExplorerRpc)
+
+  document.addEventListener("DOMContentLoaded", function() {
+    loadHead()
+    loadNav().then(function(r) {
+      navSearchPerformed()
+    })
+    loadFooter()
+    loadWalletPinModal()
+
+    if (!(loggedViewMode() || loggedSpendMode())) {
+      window.location.href = '/wallet/login.html'
+    }
+    if (!(loggedSpendMode())) {
+      openModal('pinModal')
+    }
+    var privateKey = calculatePrivateKey()
+    var privateKeyRaw = bsv.PrivateKey(privateKey).toHex()
+    var qrPrivateKeyRaw = new QRious({
+      element: document.getElementById('qrPrivateKeyRaw'),
+      size: 250,
+      value: privateKeyRaw
+    });
+    document.getElementById('privateKeyRaw').innerHTML = privateKeyRaw
+
+    var privateKeyWIF = bsv.PrivateKey(privateKeyRaw).toWIF().toString()
+    var qrPrivateKeyWIF = new QRious({
+      element: document.getElementById('qrPrivateKeyWIF'),
+      size: 250,
+      value: privateKeyWIF
+    });
+    document.getElementById('privateKeyWIF').innerHTML = privateKeyWIF
+  })
+</script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<html>
+<head>
+  <title>Oyo.cash - Login with private key</title>
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:creator" content="@pmitchev" />
+  <meta name="twitter:title" content="Oyo.cash - Login with private key" />
+  <meta name="twitter:description" content="Login to Oyo with private key" />
+  <meta name="twitter:image" content="https://oyo.cash/assets/images/logo-large.png" />
+  <meta property="og:url" content="https://oyo.cash/wallet/" />
+  <meta property="og:type"   content="website" />
+  <meta property="og:title" content="Oyo.cash - Login with private key" />
+  <meta property="og:description" content="Login to Oyo with private key" />
+  <meta property="og:image" content="https://oyo.cash/assets/images/logo-large.png" />
+
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  <link rel="apple-touch-icon" sizes="57x57" href="/assets/icons/apple-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="/assets/icons/apple-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/assets/icons/apple-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/assets/icons/apple-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="/assets/icons/apple-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="/assets/icons/apple-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/assets/icons/apple-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/assets/icons/apple-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-icon-180x180.png">
+  <link rel="icon" type="image/png" sizes="192x192"  href="/assets/icons/android-icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/assets/icons/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
+  <link rel="manifest" href="/assets/icons/manifest.json">
+  <meta name="msapplication-TileColor" content="#ffffff">
+  <meta name="msapplication-TileImage" content="/assets/icons/ms-icon-144x144.png">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="bitcoin-address" content="1JFAFvfWZauvVWKFsFtVomEQrPAHqEr1X8">
+
+  <script src="/assets/js/loader.js"></script>
+  <script src="/assets/js/loadVars.js"></script>
+  <script src="/assets/js/common.js"></script>
+  <script src="/assets/js/wallet.js"></script>
+  <script type="text/javascript" src="https://unpkg.com/bsv@0.30.0/bsv.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.min.js" integrity="sha256-u6BamZiW5tCemje2nrteKC2KoLIKX9lKPSpvCkOhamw=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/aes.min.js" integrity="sha256-x4ioj4Ml0BqGJWXqHZVljtkzcsm1wHYSD71Boze2cks=" crossorigin="anonymous"></script>
+  <script src="/assets/vendors/buffer.js"></script>
+</head>
+<body>
+  <noscript>Oyo Wallet - Login with private key</noscript>
+  <div id="app" class="container">
+    <div id="nav"></div>
+    <div class="grid">
+
+      <div class="s_results form">
+
+      <div id="isNewUser">
+        <p style="color:#f11;font-size:small">Pin is used to encrypt your private key.</p>
+        <p style="color:#f11;font-size:small">Oyo.cash does not store any user data. We cannot recover your user data if you lose it.</p>
+      </div>
+
+        <div class="field-block">
+          <h4>Private key</h4>
+          <input type="text" name="privateKey" id="privateKey" placeholder="privateKey" required autocomplete="off">
+        </div>
+
+        <div class="field-block">
+          <h4>Key format</h4>
+          <select name="privateKeyFormat" id="privateKeyFormat">
+            <option value="raw">Raw</option>
+            <option value="wif">WIF</option>
+          </select>
+        </div>
+
+        <div class="field-block">
+          <h4>Pin code</h4>
+          <input type="text" name="pin" id="pin" placeholder="Pin code" required autocomplete="off">
+        </div>
+
+        <div class="field-block">
+          <input type="checkbox" value="true" name="rememberUser" id="rememberUser"> Remember private key
+        </div>
+
+        <div class="form-buttons">
+          <input id="loginButton" value="Log in" type="submit"  onclick="login()" />
+          <p style="color:#666;font-size:small">Are you <a href="javascript:void(0)" onclick="newUser()">new user</a>?</p>
+          <p style="color:#666;font-size:small">Log in with <a href="/wallet/login.html">Username and password</a></p>
+        </div>
+      </div>
+
+    </div>
+    <div id="footer"></div>
+  </div>
+
+<script language='javascript'>
+  document.getElementById('isNewUser').style.display = "none";
+
+  var Buffer = buffer.Buffer
+
+  var newUser = function () {
+    document.getElementById('loginButton').value = "Sign up";
+    document.getElementById('isNewUser').style.display = "block";
+  }
+  var login = function () {
+    var privateKey = document.getElementById('privateKey').value
+    var privateKeyFormat = document.getElementById('privateKeyFormat').value
+    var rememberUser = document.getElementById('rememberUser').value
+    var pin = document.getElementById('pin').value
+    if (privateKey && privateKeyFormat && pin) {
+      let pk = null
+      if (privateKeyFormat === 'raw') {
+        pk = bsv.PrivateKey(privateKey)
+      } else if (privateKeyFormat === 'wif') {
+        pk = bsv.PrivateKey.fromWIF(privateKey)
+      }
+      const address = pk.toAddress().toString()
+      const encryptedPrivateKey = CryptoJS.AES.encrypt(pk.toString(), pin.toString())
+      if (rememberUser) {
+        localStorage.setItem('user.address', address)
+        localStorage.setItem('user.privateKey', encryptedPrivateKey)
+      } else {
+        sessionStorage.setItem('user.address', address)
+        sessionStorage.setItem('user.privateKey', encryptedPrivateKey)
+      }
+      sessionStorage.setItem('user.pin', pin)
+
+      window.location.href = '/wallet/home.html'
+    } else {
+      privateKey = pin = ''
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    if (loggedViewMode() || loggedSpendMode()) {
+      window.location.href = '/wallet/home.html'
+    }
+    loadHead()
+    loadNav().then(function(r) {
+      navSearchPerformed()
+    })
+    loadFooter()
+  })
+</script>
+</body>
+</html>

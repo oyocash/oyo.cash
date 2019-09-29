@@ -1,0 +1,102 @@
+<html>
+<head>
+  <title>Oyo.cash - How to search on Oyo</title>
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:creator" content="@pmitchev" />
+  <meta name="twitter:title" content="How to search on Oyo.cash" />
+  <meta name="twitter:description" content="Guide how to search the Bitcoin SV blockchain with oyo.cash." />
+  <meta name="twitter:image" content="https://oyo.cash/assets/images/logo-large.png" />
+  <meta property="og:url" content="https://oyo.cash/pages/howToSearch/" />
+  <meta property="og:type"   content="website" />
+  <meta property="og:title" content="How to search on Oyo.cash" />
+  <meta property="og:description" content="Guide how to search the Bitcoin SV blockchain with oyo.cash." />
+  <meta property="og:image" content="https://oyo.cash/assets/images/logo-large.png" />
+
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  <link rel="apple-touch-icon" sizes="57x57" href="/assets/icons/apple-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="/assets/icons/apple-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/assets/icons/apple-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/assets/icons/apple-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="/assets/icons/apple-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="/assets/icons/apple-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/assets/icons/apple-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/assets/icons/apple-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-icon-180x180.png">
+  <link rel="icon" type="image/png" sizes="192x192"  href="/assets/icons/android-icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/assets/icons/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
+  <link rel="manifest" href="/assets/icons/manifest.json">
+  <meta name="msapplication-TileColor" content="#ffffff">
+  <meta name="msapplication-TileImage" content="/assets/icons/ms-icon-144x144.png">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="bitcoin-address" content="1JFAFvfWZauvVWKFsFtVomEQrPAHqEr1X8">
+
+  <script src="/assets/js/loader.js"></script>
+  <script src="/assets/js/loadVars.js"></script>
+  <script src="/assets/js/common.js"></script>
+</head>
+<body>
+  <div id="app" class="container">
+    <div id="nav"></div>
+    <div class="grid">
+      <div class="s_results page">
+        <h2>Search operators</h2>
+
+        <p>The search field utilizes mongodb's <b>$search</b> operator. As result, the query syntax is the same. You can learn more about in mongodb's documentation:
+        <a href="https://docs.mongodb.com/manual/reference/operator/query/text/#search-field" target="_blank">https://docs.mongodb.com/manual/reference/operator/query/text/#search-field</a></p>
+
+        <h4>Search hashtags</h4>
+        <p>Put <code><strong>#</strong></code> in front of a word and enclose the word in double quotes (<code><strong>"</strong></code>). For example: <code><strong>"#bitquery"</strong></code>
+        <a href="https://oyo.cash/result/IiNiaXRxdWVyeSI=/0">[see on Oyo]</a></p>
+
+        <h4>Exclude words from your search</h4>
+        <p>Put <code><strong>-</strong></code> in front of a word you want to leave out. For example, <code><strong>bitcoin -core</strong></code>
+        <a href="https://oyo.cash/result/Yml0Y29pbiAtY29yZQ==/0">[see on Oyo]</a></p>
+
+        <h4>Search protocol prefixes</h4>
+        <p>Put <code><strong>prefix:</strong></code> in front of a prefix code. For example, <code><strong>prefix:6d02 cats</strong></code> <a href="https://oyo.cash/result/cHJlZml4OjZkMDIgY2F0cw==/0">[see on Oyo]</a></p>
+
+        <h4>Search in apps</h4>
+        <p>Put <code><strong>app:</strong></code> in front of the app identifier. For example, <code><strong>app:twetch love</strong></code> <a href="https://oyo.cash/result/YXBwOnR3ZXRjaCBsb3Zl/0">[see on Oyo]</a></p>
+
+        <h4>Search from date</h4>
+        <p>Put <code><strong>datetime:</strong></code> in front of date time (format: yyyyMMddHHmm). For example, <code><strong>prefix:status datetime:201904010000</strong></code> <a href="https://oyo.cash/result/cHJlZml4OnN0YXR1cyBkYXRldGltZToyMDE5MDQwMTAwMDA=/0">[see on Oyo]</a></p>
+
+        <h4>Search for period</h4>
+        <p> <i>The default period is 30 days.</i></p>
+        <p>Put <code><strong>period:</strong></code> in front of the desired search period (in days). For example, <code><strong>prefix:status datetime:201907010000 period:90</strong></code> <a href="https://oyo.cash/result/cHJlZml4OnN0YXR1cyBkYXRldGltZToyMDE5MDcwMTAwMDAgcGVyaW9kOjkw/0">[see on Oyo]</a></p>
+
+        <h4>Search transactions from (sender)</h4>
+        <p>Put <code><strong>from:</strong></code> in front of the sender's address. For example <code><strong>from:17yvo2MY6DSX4JFJNWzEdav95EDE9PcWvx bitdb</strong></code> <a href="https://oyo.cash/result/ZnJvbToxN3l2bzJNWTZEU1g0SkZKTld6RWRhdjk1RURFOVBjV3Z4IGJpdGRi/0">[see on Oyo]</a></p>
+
+        <h4>Search transactions excluding sender</h4>
+        <p>Put <code><strong>notfrom:</strong></code> in front of the sender's address. For example <code><strong>notfrom:17yvo2MY6DSX4JFJNWzEdav95EDE9PcWvx bitdb</strong></code> <a href="https://oyo.cash/result/bm90ZnJvbToxN3l2bzJNWTZEU1g0SkZKTld6RWRhdjk1RURFOVBjV3Z4IGJpdGRi/0">[see on Oyo]</a></p>
+
+        <h4>Exact match</h4>
+        <p>Put a word or phrase inside quotes. For example, <code><strong>"bitcoin unlimited"</strong></code>.
+        <a href="https://oyo.cash/result/ImJpdGNvaW4gdW5saW1pdGVkIg==/0">[see on Oyo]</a></p>
+
+        <h4>Combining searches</h4>
+        <p>
+          Put a word or phrase inside quotes for mandatory match (AND). Use a word without quotes for optional match (OR). Examples:<br/>
+          <code><strong>"moneybutton" "wordpress"</strong></code> (searches for "moneybutton AND wordpress") <a href="https://oyo.cash/result/Im1vbmV5YnV0dG9uIiAid29yZHByZXNzIg==/0">[see on Oyo]</a><br/>
+          <code><strong>liquid lightning</strong></code> (searches for "liquid OR lightning") <a href="https://oyo.cash/result/bGlxdWlkIGxpZ2h0bmluZw==/0">[see on Oyo]</a><br/>
+          <code><strong>"market" bull bear</strong></code> (searches for "market AND (market OR bull OR bear)") <a href="https://oyo.cash/result/Im1hcmtldCIgYnVsbCBiZWFy/0">[see on Oyo]</a>
+        </p>
+      </div>
+    </div>
+    <div id="footer"></div>
+  </div>
+
+<script language='javascript'>
+  document.addEventListener("DOMContentLoaded", function() {
+    loadHead()
+    loadNav().then(function(r) {
+      navSearchPerformed(window.searchPeriodDefault, 0)
+    })
+    loadFooter()
+  })
+</script>
+</body>
+</html>

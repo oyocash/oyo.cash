@@ -1,0 +1,13 @@
+<svg width="640" height="480" xmlns="http://www.w3.org/2000/svg">
+ <!-- Created with SVG-edit - https://github.com/SVG-Edit/svgedit-->
+
+ <g>
+  <title>background</title>
+  <rect x="-1" y="-1" width="642" height="482" id="canvas_background" fill="none"/>
+ </g>
+ <g class="layer">
+  <title>Layer 1</title>
+  <circle cx="200" cy="230" fill="#ffffff" fill-opacity="0" id="svg_3" r="150" stroke="#000000" stroke-width="5"/>
+  <circle cx="430" cy="230" fill="#ffffff" fill-opacity="0" id="svg_4" r="150" stroke="#000000" stroke-width="5"/>
+ </g>
+</svg>

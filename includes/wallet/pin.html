@@ -1,0 +1,14 @@
+<!-- The Modal -->
+<div id="pinModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('pinModal')">&times;</span>
+    <h2>Pin</h2>
+    <p id="pinError" style="color:#f11;font-size:small"></p>
+    <p><input type="password" name="pin" id="pin" placeholder="Pin" autofocus/><br />
+    <input type="checkbox" value="true" name="rememberPin" id="rememberPin"> Remember pin</p>
+    <p>
+      <input value="Login" type="submit" onclick="enterPin()">
+      <input value="Close" type="button" onclick="closeModal('pinModal')">
+    </p>
+  </div>
+</div>
