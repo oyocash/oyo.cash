@@ -10,7 +10,7 @@
           // /result/dGVzdA==/
           var match = pathname.match(/\/result\/(\S+)/u)
           var realPath = "/"
-          if (match && match[1] && match[2]) {
+          if (match && match[1]) {
             realPath = "/result/?search=" + match[1] + "&offset=0"
           }
           // /result/dGVzdA==/7
