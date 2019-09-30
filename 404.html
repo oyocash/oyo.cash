@@ -7,15 +7,14 @@
             // Thank you internet explorer for requiring such awesome workarounds in order to work properly
             // ====================================================================================================================
           var pathname = window.location.pathname
+          var realPath = "/"
           // /result/dGVzdA==/
           var match = pathname.match(/\/result\/(\S+)/u)
-          var realPath = "/"
           if (match && match[1]) {
             realPath = "/result/?search=" + match[1] + "&offset=0"
           }
           // /result/dGVzdA==/7
           var match = pathname.match(/\/result\/(\S+)\/(\d+)/u)
-          var realPath = "/"
           if (match && match[1] && match[2]) {
             realPath = "/result/?search=" + match[1] + "&offset=" + match[2]
           }
