@@ -70,7 +70,7 @@ if (localStorage.getItem('resultsPerPage')) {
   }
 }
 // protocols
-window.protocolsDefault = {}
+window.protocolsDefault = "{}"
 if (!localStorage.getItem('protocols')) {
   window.protocols = window.protocolsDefault
 } else {

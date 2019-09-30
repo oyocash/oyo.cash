@@ -68,7 +68,7 @@
             <textarea name="protocols" id="protocols" title="Protocols" rows="15"></textarea>
           </div>
           <div class="form-buttons">
-            <input value="submit" type="submit" onclick="setValues">
+            <input value="submit" type="submit" onclick="setValues()">
             <p style="color:#666;font-size:small">Saved settings are stored only in your browser.</p>
           </div>
         </div>
@@ -78,33 +78,72 @@
   </div>
 
 <script language='javascript'>
+  document.getElementById('bobNode').value =window.bobNode
+  document.getElementById('bitdbApiKey').value = window.bitdbApiKey
+  document.getElementById('bitsocketNode').value = window.bitsocketNode
+  document.getElementById('blockExplorerRpc').value = window.blockExplorerRpc
+  document.getElementById('resultsPerPage').value = window.resultsPerPage
+  document.getElementById('protocols').value = window.protocols
+
+  var setValues = function() {
+    var bobNode = document.getElementById('bobNode').value
+    var bitdbApiKey = document.getElementById('bitdbApiKey').value
+    var bitsocketNode = document.getElementById('bitsocketNode').value
+    var blockExplorerRpc = document.getElementById('blockExplorerRpc').value
+    var resultsPerPage = document.getElementById('resultsPerPage').value
+    var protocols = document.getElementById('protocols').value
+    if (bobNode && bobNode !== window.bobNodeDefault) {
+      localStorage.setItem('bobNode', bobNode)
+      window.bobNode = bobNode
+    } else {
+      localStorage.removeItem('bobNode')
+      window.bobNode = window.bobNodeDefault
+    }
+
+    if (bitdbApiKey && bitdbApiKey !== window.bitdbApiKeyDefault) {
+      localStorage.setItem('bitdbApiKey', bitdbApiKey)
+      window.bitdbApiKey = bitdbApiKey
+    } else {
+      localStorage.removeItem('bitdbApiKey')
+      window.bitdbApiKey = window.bitdbApiKeyDefault
+    }
+    if (bitsocketNode && bitsocketNode !== window.bitsocketNodeDefault) {
+      localStorage.setItem('bitsocketNode', bitsocketNode)
+      window.bitsocketNode = bitsocketNode
+    } else {
+      localStorage.removeItem('bitsocketNode')
+      window.bitsocketNode = window.bitsocketNodeDefault
+    }
+    if (blockExplorerRpc && blockExplorerRpc !== window.blockExplorerRpcDefault) {
+      localStorage.setItem('blockExplorerRpc', blockExplorerRpc)
+      window.blockExplorerRpc = blockExplorerRpc
+    } else {
+      localStorage.removeItem('blockExplorerRpc')
+      window.blockExplorerRpc = window.blockExplorerRpcDefault
+    }
+    if (resultsPerPage && resultsPerPage !== window.resultsPerPageDefault) {
+      localStorage.setItem('resultsPerPage', resultsPerPage)
+      window.resultsPerPage = resultsPerPage
+    } else {
+      localStorage.removeItem('resultsPerPage')
+      window.resultsPerPage = window.resultsPerPageDefault
+    }
+    if (protocols && protocols !== window.protocolsDefault) {
+      localStorage.setItem('protocols', protocols)
+      window.protocols = protocols
+    } else {
+      localStorage.removeItem('protocols')
+      window.protocols = window.protocolsDefault
+    }
+    location.reload()
+  }
+
   document.addEventListener("DOMContentLoaded", function() {
     loadHead()
     loadNav().then(function(r) {
       navSearchPerformed(window.searchPeriodDefault, 0)
     })
     loadFooter()
-
-    var setValues = function() {
-      var bobNode = document.getElementById('bobNode').value
-      var bitdbApiKey = document.getElementById('bitdbApiKey').value
-      if (bobNode && bobNode !== window.bobNodeDefault) {
-        localStorage.setItem('bobNode', bobNode)
-        window.bobNode = bobNode
-      } else {
-        localStorage.removeItem('bobNode')
-        window.bobNode = window.bobNodeDefault
-      }
-
-      if (bitdbApiKey && bitdbApiKey !== window.bitdbApiKeyDefault) {
-        localStorage.setItem('bitdbApiKey', bitdbApiKey)
-        window.bitdbApiKey = bitdbApiKey
-      } else {
-        localStorage.removeItem('bitdbApiKey')
-        window.bitdbApiKey = window.bitdbApiKeyDefault
-      }
-      location.reload()
-    }
   })
 </script>
 </body>
