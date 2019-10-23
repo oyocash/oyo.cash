@@ -112,7 +112,7 @@
   </div>
 
   <!-- Pin Modal -->
-  <div id="pinModal"></div>
+  <div id="walletPinModal"></div>
 
 <script language='javascript'>
   var txOpReturn = []
@@ -144,7 +144,7 @@
     } else {
       sessionStorage.setItem('user.pin', pin)
     }
-    
+
     if (addressFromPrivateKey() === undefined || getAddress() != addressFromPrivateKey()) {
       document.getElementById('pinError').innerHTML = "Incorrect pin"
       sessionStorage.removeItem('user.pin')
@@ -157,6 +157,7 @@
   function sendTx () {
     if (!loggedSpendMode()) {
       openModal('pinModal')
+      return
     }
     document.getElementById('sendError').innerHTML = ""
     document.getElementById('sendSuccess').innerHTML = ""
