@@ -1,6 +1,7 @@
 <html>
 <head>
   <title>Oyo.cash - Settings</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:creator" content="@pmitchev" />
   <meta name="twitter:title" content="Settings for Oyo.cash" />
@@ -45,14 +46,18 @@
         <div class="form" style="margin-bottom: 45px;">
           <div class="field-block">
             <h4>Planaria (BOB) node (query)</h4>
-        	   <input type="text" name="bobNode" id="bobNode" title="Planaria node" placeholder="Planaria node address"/>
+        	   <input type="text" name="bobNode" id="bobNode" title="BOB Planaria node" placeholder="BOB Planaria node address"/>
           </div>
           <div class="field-block">
             <h4>Planaria (BOB) node (socket)</h4>
-        	   <input type="text" name="bitsocketNode" id="bitsocketNode" title="Bitsocket node" placeholder="Bitsocket node address"/>
+        	   <input type="text" name="bitsocketNode" id="bitsocketNode" title="BOB Bitsocket node" placeholder="BOB Bitsocket node address"/>
           </div>
           <div class="field-block">
-            <h4>Planaria (BOB) API key</h4>
+            <h4>Planaria (neonGenesis) node</h4>
+        	   <input type="text" name="neongenesisNode" id="neongenesisNode" title="neonGenesis Planaria node" placeholder="neonGenesis Planaria node address"/>
+          </div>
+          <div class="field-block">
+            <h4>Planaria API key</h4>
             <input type="text" name="bitdbApiKey" id="bitdbApiKey" title="Planaria API key" placeholder="Planaria API key"/>
           </div>
           <div class="field-block">
@@ -79,6 +84,7 @@
 
 <script language='javascript'>
   document.getElementById('bobNode').value =window.bobNode
+  document.getElementById('neongenesisNode').value =window.neongenesisNode
   document.getElementById('bitdbApiKey').value = window.bitdbApiKey
   document.getElementById('bitsocketNode').value = window.bitsocketNode
   document.getElementById('blockExplorerRpc').value = window.blockExplorerRpc
@@ -87,6 +93,7 @@
 
   var setValues = function() {
     var bobNode = document.getElementById('bobNode').value
+    var neongenesisNode = document.getElementById('neongenesisNode').value
     var bitdbApiKey = document.getElementById('bitdbApiKey').value
     var bitsocketNode = document.getElementById('bitsocketNode').value
     var blockExplorerRpc = document.getElementById('blockExplorerRpc').value
@@ -99,7 +106,13 @@
       localStorage.removeItem('bobNode')
       window.bobNode = window.bobNodeDefault
     }
-
+    if (neongenesisNode && neongenesisNode !== window.neongenesisNodeDefault) {
+      localStorage.setItem('neongenesisNode', neongenesisNode)
+      window.neongenesisNode = neongenesisNode
+    } else {
+      localStorage.removeItem('neongenesisNode')
+      window.neongenesisNode = window.neongenesisNodeDefault
+    }
     if (bitdbApiKey && bitdbApiKey !== window.bitdbApiKeyDefault) {
       localStorage.setItem('bitdbApiKey', bitdbApiKey)
       window.bitdbApiKey = bitdbApiKey
