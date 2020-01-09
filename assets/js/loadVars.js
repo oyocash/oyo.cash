@@ -1,5 +1,6 @@
 // for Oyo External Link Protocol
 window.oyoProRankingPeriod = 30 * 24 * 60 * 60 // 30 days
+window.oyoProDefaultLink = "https://link.oyo.cash/?tx={tx_hash}"
 // default search period
 window.searchPeriodDefault = 30
 window.searchPeriod = window.searchPeriodDefault

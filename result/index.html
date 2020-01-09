@@ -34,7 +34,7 @@
   <meta name="bitcoin-address" content="1JFAFvfWZauvVWKFsFtVomEQrPAHqEr1X8">
 
   <script src="/assets/js/loader.js"></script>
-  <script src="/assets/js/loadVars.js"></script>
+  <script src="/assets/js/loadVars.js?090100"></script>
   <script src="/assets/js/common.js"></script>
   <script src="/assets/js/bob.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js" integrity="sha256-4iQZ6BVL4qNKlQ27TExEhBN1HFPvAvAMbFavKKosSWQ=" crossorigin="anonymous"></script>
@@ -283,6 +283,9 @@
           link = oyoExternalLinks["baseProtocol"][item.out[outIndex].tape[tapeIndex].cell[0].s][0]
         }
       } else if (oyoExternalLinks["default"] !== undefined) {
+        if (oyoExternalLinks["default"]["default"] === undefined || oyoExternalLinks["default"]["default"][0] === undefined) {
+          link = window.oyoProDefaultLink
+        }
         link = oyoExternalLinks["default"]["default"][0]
       }
     }
