@@ -584,9 +584,8 @@
     var itemDiv = document.createElement("div");
     itemDiv.className = "s_result";
     // row 1 content
-    var row1Div = document.createElement("div");
-    row1Div.className = "title"
     var row1 = document.createElement("a");
+    row1.className = "title"
     row1.setAttribute("href", link);
     var textTitleNode = ""
     if (title) {
@@ -594,7 +593,7 @@
     } else {
       textTitleNode = document.createTextNode(convertToTitle(resultMatchingStrings[index]))
     }
-    itemDiv.appendChild(row1Div).appendChild(row1).appendChild(textTitleNode);
+    itemDiv.appendChild(row1).appendChild(textTitleNode);
     // row 2 content
     var row2 = document.createElement("div");
     row2.className = "content"
