@@ -477,6 +477,7 @@ nav ul li ul li a:hover {
 	nav {
      height: 0;
 		 width: 100%;
+     max-width: 100%;
      margin: 0;
 		 padding: 70px 0 15px;
 	}
@@ -795,6 +796,7 @@ h3{
     grid-column: span 10;
     font-family: arial, sans-serif;
     margin: 15px 10px 51px;
+    max-width: 100%;
   }
   .page_number{
     margin-top: 15px;
