@@ -148,6 +148,20 @@
   var startDateForm = new Date(startDateTimestamp * 1000).toISOString().substring(0, 10)
   document.getElementById('startDateForm').value = startDateForm
 
+  function highlight(field, text) {
+    var inputText = document.getElementById(field);
+    var innerHTML = inputText.innerHTML;
+    var index = innerHTML.indexOf(text);
+    var re = new RegExp(arr.join("|"), "g"); // create a a | b | c regex
+    // console.log(re, str.match(re));
+    innerHTML.match(re).forEach(function(match, i) { // loop over the matches
+      innerHTML = innerHTML.replace(match, function replace(match) { // wrap the found strings
+        return "<span class='highlight'>" + match + "</span>";
+      });
+    });
+    inputText.innerHTML = innerHTML;
+  }
+
   var changeSearchEndDate = function(date) {
     if (date.length !== 10) {
       return
@@ -285,8 +299,9 @@
       } else if (oyoExternalLinks["default"] !== undefined) {
         if (oyoExternalLinks["default"]["default"] === undefined || oyoExternalLinks["default"]["default"][0] === undefined) {
           link = window.oyoProDefaultLink
+        } else {
+          link = oyoExternalLinks["default"]["default"][0]
         }
-        link = oyoExternalLinks["default"]["default"][0]
       }
     }
     //replace {tx_hash}
