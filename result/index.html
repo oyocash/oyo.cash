@@ -34,9 +34,9 @@
   <meta name="bitcoin-address" content="1JFAFvfWZauvVWKFsFtVomEQrPAHqEr1X8">
 
   <script src="/assets/js/loader.js"></script>
-  <script src="/assets/js/loadVars.js?090100"></script>
+  <script src="/assets/js/loadVars.js?190201"></script>
   <script src="/assets/js/common.js"></script>
-  <script src="/assets/js/bob.js"></script>
+  <script src="/assets/js/bob.js?190201"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js" integrity="sha256-4iQZ6BVL4qNKlQ27TExEhBN1HFPvAvAMbFavKKosSWQ=" crossorigin="anonymous"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" integrity="sha256-Uv9BNBucvCPipKQ2NS9wYpJmi8DTOEfTA/nH2aoJALw=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pikaday/1.8.0/pikaday.min.js" integrity="sha256-+B1vOR24Jpk4oWE/+SWu7AxoQqrqDT4SF+12bixBdjw=" crossorigin="anonymous"></script>
@@ -110,7 +110,7 @@
   var listApps = []
   var bitcomProtocols = {}
   var oyoExternalLinks = []
-  var protocols = window.protocols
+  var protocols = JSON.parse(window.protocols)
   var picker = new Pikaday(
   {
       field: document.getElementById('endDateForm'),
@@ -153,7 +153,6 @@
     var innerHTML = inputText.innerHTML;
     var index = innerHTML.indexOf(text);
     var re = new RegExp(arr.join("|"), "g"); // create a a | b | c regex
-    // console.log(re, str.match(re));
     innerHTML.match(re).forEach(function(match, i) { // loop over the matches
       innerHTML = innerHTML.replace(match, function replace(match) { // wrap the found strings
         return "<span class='highlight'>" + match + "</span>";
@@ -272,21 +271,12 @@
 
   var getLink = function (item, outIndex, tapeIndex, index) {
     let link = ''
-    let linkArray = []
     if (protocols[item.out[outIndex].tape[tapeIndex].cell[0].b] && protocols[item.out[outIndex].tape[tapeIndex].cell[0].b].link) {
-      linkArray = protocols[item.out[outIndex].tape[tapeIndex].cell[0].b].link
+      link = protocols[item.out[outIndex].tape[tapeIndex].cell[0].b].link
     } else if (protocols[item.out[outIndex].tape[tapeIndex].cell[0].s] && protocols[item.out[outIndex].tape[tapeIndex].cell[0].s].link) {
-      linkArray = protocols[item.out[outIndex].tape[tapeIndex].cell[0].s].link
+      link = protocols[item.out[outIndex].tape[tapeIndex].cell[0].s].link
     }
-    for (let i = 0; i < linkArray.length; ++i) {
-      if (linkArray[i].startsWith("var:")) {
-        let tmpLink = linkArray[i].replace(/^var:/g, '')
-        tmpLink = tmpLink.replace(/\?/g, outIndex)
-        link += eval('item.' + tmpLink)
-      } else {
-        link += linkArray[i]
-      }
-    }
+
     if (link === '') {
       if (oyoExternalLinks["mapApp"] !== undefined && resultApps[index] !== undefined && oyoExternalLinks["mapApp"][resultApps[index]] !== undefined) {
         link = oyoExternalLinks["mapApp"][resultApps[index]][0]
@@ -478,7 +468,6 @@
     let b64 = btoa(JSON.stringify(query))
     let url = window.bobNode + b64
 
-    console.log(url)
     let header
     if (window.bitdbApiKey) {
       header = {
@@ -552,15 +541,14 @@
 
         for (let key in bitcomProtocols) {
           if (!bitcomProtocols.hasOwnProperty(key)) continue;
-
           let bitcomProtocol = bitcomProtocols[key]
           if (protocols[key] === undefined) {
             let protocol = {}
             if (bitcomProtocol['name'] !== undefined) {
               protocol['name'] = bitcomProtocol['name']
             }
-            if (bitcomProtocol['tx_url'] !== undefined) {
-              protocol['link'] = [ bitcomProtocol['tx_url'], "var:tx.h" ]
+            if (oyoExternalLinks['baseProtocol'][key] !== undefined) {
+              protocol['link'] = oyoExternalLinks['baseProtocol'][key][0]
             }
             if (protocol['name'] || protocol['link']) {
               protocols[key] = protocol

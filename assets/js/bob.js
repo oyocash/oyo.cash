@@ -86,8 +86,8 @@ var getOyoExternalLinkProtocols = function(listBaseProtocols, listApps) {
 }
 var getOyoExternalLinkRankings = function(address, type, names) {
   return new Promise(function(resolve, reject) {
+    var oyoLinks = {}
     if (names.length === 0) {
-      var oyoLinks = []
       oyoLinks[type] = {}
       resolve(oyoLinks)
     }
@@ -97,7 +97,7 @@ var getOyoExternalLinkRankings = function(address, type, names) {
 
     let $or = []
     for (let i = 0; i < names.length; ++i) {
-      $or.push({"out.s3": unescape(encodeURIComponent(names[i]))})
+      $or.push({"out.s4": unescape(encodeURIComponent(names[i]))})
     }
 
     var query = {
@@ -106,13 +106,13 @@ var getOyoExternalLinkRankings = function(address, type, names) {
         "aggregate": [{
           "$match": {
             "$and": [{
-              "out.s1": address
+              "out.s2": address
             }, {
-              "out.s2": type
+              "out.s3": type
             }, {
               $or
             }, {
-              "out.s4": { "$regex" : "https?:\\/\\/.*\\{tx_hash\\}.*" }
+              "out.s5": { "$regex" : "https?:\\/\\/.*\\{tx_hash\\}.*" }
             }, {
               "out.e.a": address
             }, {
@@ -128,7 +128,7 @@ var getOyoExternalLinkRankings = function(address, type, names) {
           }
         }, {
           '$project': {
-            "out.s3":1, "out.s4": 1,
+            "out.s4":1, "out.s5": 1,
             'satoshis': {
               '$cond': {
                 'if': {
@@ -164,8 +164,8 @@ var getOyoExternalLinkRankings = function(address, type, names) {
         }, {
           "$group": {
               "_id": {
-                "name": "$out.s3",
-                "url": "$out.s4"
+                "name": "$out.s4",
+                "url": "$out.s5"
               },
               "satoshis": {
                 "$sum": "$satoshis"
@@ -208,7 +208,6 @@ var getOyoExternalLinkRankings = function(address, type, names) {
             }
           }
           // assign items here
-          var oyoLinks = []
           oyoLinks[type] = {}
           for (let i = 0; i < items.length; ++i) {
             if (oyoLinks[type][items[i]._id.name] === undefined) {
