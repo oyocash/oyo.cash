@@ -106,8 +106,9 @@
   var resultOutIndex = []
   var resultTapeIndex = []
   var resultApps = []
-  var listBaseProtocols = []
-  var listApps = []
+  var listBaseApps = []
+  var listMapApps = []
+  var listRunApps = []
   var bitcomProtocols = {}
   var oyoExternalLinks = []
   var protocols = JSON.parse(window.protocols)
@@ -278,13 +279,15 @@
     }
 
     if (link === '') {
-      if (oyoExternalLinks["mapApp"] !== undefined && resultApps[index] !== undefined && oyoExternalLinks["mapApp"][resultApps[index]] !== undefined) {
-        link = oyoExternalLinks["mapApp"][resultApps[index]][0]
-      } else if (oyoExternalLinks["baseProtocol"] !== undefined && resultApps[index] !== undefined && oyoExternalLinks["baseProtocol"][resultApps[index]] !== undefined) {
-        if (item.out[outIndex].tape[tapeIndex].cell[0].b.length <= 6 && oyoExternalLinks["baseProtocol"][item.out[outIndex].tape[tapeIndex].cell[0].b]) {
-          link = oyoExternalLinks["baseProtocol"][item.out[outIndex].tape[tapeIndex].cell[0].b][0]
-        } else if (oyoExternalLinks["baseProtocol"][item.out[outIndex].tape[tapeIndex].cell[0].s]) {
-          link = oyoExternalLinks["baseProtocol"][item.out[outIndex].tape[tapeIndex].cell[0].s][0]
+      if (oyoExternalLinks["map"] !== undefined && resultApps[index] !== undefined && oyoExternalLinks["map"][resultApps[index]] !== undefined) {
+        link = oyoExternalLinks["map"][resultApps[index]][0]
+      } else if (oyoExternalLinks["run"] !== undefined && resultApps[index] !== undefined && oyoExternalLinks["run"][resultApps[index]] !== undefined) {
+        link = oyoExternalLinks["run"][resultApps[index]][0]
+      } else if (oyoExternalLinks["base"] !== undefined && resultApps[index] !== undefined && oyoExternalLinks["base"][resultApps[index]] !== undefined) {
+        if (item.out[outIndex].tape[tapeIndex].cell[0].b.length <= 6 && oyoExternalLinks["base"][item.out[outIndex].tape[tapeIndex].cell[0].b]) {
+          link = oyoExternalLinks["base"][item.out[outIndex].tape[tapeIndex].cell[0].b][0]
+        } else if (oyoExternalLinks["base"][item.out[outIndex].tape[tapeIndex].cell[0].s]) {
+          link = oyoExternalLinks["base"][item.out[outIndex].tape[tapeIndex].cell[0].s][0]
         }
       } else if (oyoExternalLinks["default"] !== undefined) {
         if (oyoExternalLinks["default"]["default"] === undefined || oyoExternalLinks["default"]["default"][0] === undefined) {
@@ -483,10 +486,10 @@
       for (let i = 0; i < resultAllItems.length; ++i) {
         for (let ii = 0; ii < resultAllItems[i]['out'].length; ++ii) {
           for (let iii = 0; iii < resultAllItems[i]['out'][ii]['tape'].length; ++iii) {
-            //populate listBaseProtocols
+            //populate listBaseApps
             let prefix = resultAllItems[i]['out'][ii]['tape'][iii]['cell'][0].s
-            if (prefix !== undefined && !(listBaseProtocols.includes(prefix))) {
-              listBaseProtocols.push(prefix)
+            if (prefix !== undefined && !(listBaseApps.includes(prefix))) {
+              listBaseApps.push(prefix)
             }
             //populate BitcomPrefix
             if (!(bitcomPrefixes.includes(prefix)) && protocols[prefix] === undefined) {
@@ -499,9 +502,6 @@
 
             //populate MapApps
             let thisOut = resultAllItems[i]['out'][ii]['tape'][iii]
-            if (thisOut['cell'][3] !== undefined && thisOut['cell'][3].s !== undefined && thisOut['cell'][2].s === 'app') {
-              resultApps[i] = thisOut['cell'][3].s
-            }
             if (thisOut['cell'][5] !== undefined && thisOut['cell'][5].s !== undefined && thisOut['cell'][4].s === 'app') {
               resultApps[i] = thisOut['cell'][5].s
             }
@@ -529,13 +529,19 @@
             if (thisOut['cell'][21] !== undefined && thisOut['cell'][21].s !== undefined && thisOut['cell'][20].s === 'app') {
               resultApps[i] = thisOut['cell'][21].s
             }
+
+            //populate RunApps
+            if (thisOut['cell'][4] !== undefined && thisOut['cell'][4].s !== undefined && thisOut['cell'][2].s === 'run') {
+              resultApps[i] = thisOut['cell'][3].s
+            }
+
             if (resultApps[i] && !(listApps.includes(resultApps[i]))) {
               listApps.push(resultApps[i])
             }
           }
         }
       }
-      Promise.all([getOyoExternalLinkProtocols(listBaseProtocols, listApps), getBitcomProtocols()]).then(function(values) {
+      Promise.all([getOyoExternalLinkProtocols(listBaseApps, listMapApps, listRunApps), getBitcomProtocols()]).then(function(values) {
         oyoExternalLinks = values[0]
         bitcomProtocols = values[1]
 
@@ -547,8 +553,8 @@
             if (bitcomProtocol['name'] !== undefined) {
               protocol['name'] = bitcomProtocol['name']
             }
-            if (oyoExternalLinks['baseProtocol'][key] !== undefined) {
-              protocol['link'] = oyoExternalLinks['baseProtocol'][key][0]
+            if (oyoExternalLinks['base'][key] !== undefined) {
+              protocol['link'] = oyoExternalLinks['base'][key][0]
             }
             if (protocol['name'] || protocol['link']) {
               protocols[key] = protocol

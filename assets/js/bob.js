@@ -66,17 +66,19 @@ var getBitcomProtocols =  function() {
   });
 }
 
-var getOyoExternalLinkProtocols = function(listBaseProtocols, listApps) {
+var getOyoExternalLinkProtocols = function(listBaseApps, listMapApps, listRunApps) {
   return new Promise(function(resolve, reject) {
     Promise.all([
       getOyoExternalLinkRankings("149xadSKJcKdhgE4sMmcvx421nsGYwgkWo", "default", ["default"]),
-      getOyoExternalLinkRankings("149xadSKJcKdhgE4sMmcvx421nsGYwgkWo", "baseProtocol", listBaseProtocols),
-      getOyoExternalLinkRankings("149xadSKJcKdhgE4sMmcvx421nsGYwgkWo", "mapApp", listApps)
+      getOyoExternalLinkRankings("149xadSKJcKdhgE4sMmcvx421nsGYwgkWo", "base", listBaseApps),
+      getOyoExternalLinkRankings("149xadSKJcKdhgE4sMmcvx421nsGYwgkWo", "map", listMapApps),
+      getOyoExternalLinkRankings("149xadSKJcKdhgE4sMmcvx421nsGYwgkWo", "map", listRunApps)
     ]).then(function(values) {
       var returnValues = {}
       returnValues.default = values[0].default
-      returnValues.baseProtocol = values[1].baseProtocol
-      returnValues.mapApp = values[2].mapApp
+      returnValues.base = values[1].base
+      returnValues.map = values[2].map
+      returnValues.run = values[3].run
       resolve(returnValues)
     }).catch(error => {
       reject(error)
