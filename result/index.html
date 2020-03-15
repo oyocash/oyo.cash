@@ -13,7 +13,7 @@
   <meta property="og:description" content="Search result for content posted on the Bitcoin blockchain" />
   <meta property="og:image" content="https://oyo.cash/assets/images/logo-large.png" />
 
-  <link rel="stylesheet" href="/assets/css/styles.css?220101">
+  <link rel="stylesheet" href="/assets/css/styles.css?150301">
   <link rel="apple-touch-icon" sizes="57x57" href="/assets/icons/apple-icon-57x57.png">
   <link rel="apple-touch-icon" sizes="60x60" href="/assets/icons/apple-icon-60x60.png">
   <link rel="apple-touch-icon" sizes="72x72" href="/assets/icons/apple-icon-72x72.png">
@@ -149,17 +149,14 @@
   var startDateForm = new Date(startDateTimestamp * 1000).toISOString().substring(0, 10)
   document.getElementById('startDateForm').value = startDateForm
 
-  function highlight(field, text) {
-    var inputText = document.getElementById(field);
-    var innerHTML = inputText.innerHTML;
-    var index = innerHTML.indexOf(text);
-    var re = new RegExp(arr.join("|"), "g"); // create a a | b | c regex
-    innerHTML.match(re).forEach(function(match, i) { // loop over the matches
-      innerHTML = innerHTML.replace(match, function replace(match) { // wrap the found strings
-        return "<span class='highlight'>" + match + "</span>";
-      });
+  function highlight(inputText, textArray) {
+    inputText = inputText.replace(/[\x26\x0A\x3c\x3e\x22\x27]/g, function(r) {
+  	   return "&#" + r.charCodeAt(0) + ";";
     });
-    inputText.innerHTML = innerHTML;
+    textArray.forEach(function(value, key) {
+      inputText = inputText.replace(new RegExp(value, 'gi'), '<span class="highlightedText">$&</span>')
+    })
+    return inputText
   }
 
   var changeSearchEndDate = function(date) {
@@ -534,7 +531,6 @@
             if (thisOut['cell'][4] !== undefined && thisOut['cell'][4].s !== undefined && thisOut['cell'][2].s === 'run') {
               resultApps[i] = thisOut['cell'][3].s
             }
-            //
           }
         }
       }
@@ -594,11 +590,13 @@
     row1.className = "title"
     row1.setAttribute("href", link);
     var textTitleNode = ""
-    if (title) {
-      textTitleNode = document.createTextNode(title);
-    } else {
-      textTitleNode = document.createTextNode(convertToTitle(resultMatchingStrings[index]))
+    var titleText = title
+    if (!titleText) {
+      titleText = convertToTitle(resultMatchingStrings[index])
     }
+    titleText = highlight(titleText, highlightArray)
+    var textTitleNode = document.createElement('div');
+    textTitleNode.innerHTML = titleText
     itemDiv.appendChild(row1).appendChild(textTitleNode);
     // row 2 content
     var row2 = document.createElement("div");
@@ -630,7 +628,10 @@
     }
     var dateTextNode = document.createTextNode(dateText);
     timeSpan.appendChild(dateTextNode);
-    var contentTextNode = document.createTextNode(resultLongestStrings[index])
+
+    resultLongestStrings[index] = highlight(resultLongestStrings[index], highlightArray)
+    var contentTextNode = document.createElement('div');
+    contentTextNode.innerHTML = resultLongestStrings[index]
     sDetail.appendChild(timeSpan)
     sDetail.appendChild(contentTextNode)
     itemDiv.appendChild(row2).appendChild(sDetailOuterDiv).appendChild(sDetail)

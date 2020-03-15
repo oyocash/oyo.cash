@@ -811,6 +811,9 @@ h3{
   color: #000000;
   font-weight: bold;
 }
+.highlightedText {
+  background: #FFFF66;
+}
 /* end search results */
 
 /* start period nav */
