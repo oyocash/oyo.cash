@@ -15,49 +15,74 @@ var getBitcomProtocols =  function() {
         'limit': 500
       }
     }
-    let b64 = btoa(JSON.stringify(query))
-    let url = window.bobNode + b64
 
-    let header
-    if (window.bitdbApiKey) {
-      header = { headers: { key: window.bitdbApiKey } }
+    let fetchParams = {
+      method: "post",
+      headers: {
+        'Content-type': 'application/json; charset=utf-8',
+        'token': window.planariaToken,
+        "format": "json"
+      },
+      body: JSON.stringify(query)
     }
 
-    fetch(url, header).then(function(r) {
-      return r.json()
-    }).then(response => {
-      if (response !== undefined && (response.u !== undefined || response.c !== undefined)) {
-        let bitcomEchoResults = []
-        if (response.u !== undefined) {
-          bitcomEchoResults = bitcomEchoResults.concat(response.u.reverse())
-        }
-        if (response.c !== undefined) {
-          bitcomEchoResults = bitcomEchoResults.concat(response.c)
-        }
+    var fetchResponse = ""
+    const decoder = new TextDecoder('utf-8');
 
-        let bitcomProtocols = {}
-        for (let i = 0; i < bitcomEchoResults.length; ++i) {
-          for (let j = 0; j < bitcomEchoResults[i]['out'].length; ++j) {
-            if (!bitcomEchoResults[i]['out'][j]) {
-              continue
+    fetch(window.bobNode, fetchParams)
+    // Retrieve its body as ReadableStream
+    .then(response => response.body)
+    .then(rs => {
+      const reader = rs.getReader();
+
+      return new ReadableStream({
+        async start(controller) {
+          while (true) {
+            const { done, value } = await reader.read();
+
+            if (value) {
+              var decoded = decoder.decode(value);
+              fetchResponse = fetchResponse.concat(decoded);
             }
-            for (let jj = 0; jj < bitcomEchoResults[i]['out'][j]['tape'].length; ++jj) {
-              if (bitcomProtocols[bitcomEchoResults[i]['in'][0].e.a] === undefined) {
-                bitcomProtocols[bitcomEchoResults[i]['in'][0].e.a] = {}
-              }
-              if (bitcomEchoResults[i]['out'][j]['tape'][jj]['cell'][4] !== undefined) {
-                if (bitcomEchoResults[i]['out'][j]['tape'][jj]['cell'][0].s === "$" && bitcomEchoResults[i]['out'][j]['tape'][jj]['cell'][1].s === "echo" && bitcomEchoResults[i]['out'][j]['tape'][jj]['cell'][3].s === "to" && bitcomEchoResults[i]['out'][j]['tape'][jj]['cell'][4].s === "name") {
-                  let field = bitcomEchoResults[i]['out'][j]['tape'][jj]['cell'][4].s
-                  if (bitcomProtocols[bitcomEchoResults[i]['in'][0].e.a][field] === undefined) {
-                    bitcomProtocols[bitcomEchoResults[i]['in'][0].e.a][field] = bitcomEchoResults[i]['out'][j]['tape'][jj]['cell'][2].s
+
+            // When no more data needs to be consumed, break the reading
+            if (done) {
+              let bitcomEchoResults = JSON.parse(fetchResponse)
+
+              let bitcomProtocols = {}
+              for (let i = 0; i < bitcomEchoResults.length; ++i) {
+                for (let j = 0; j < bitcomEchoResults[i]['out'].length; ++j) {
+                  if (!bitcomEchoResults[i]['out'][j]) {
+                    continue
+                  }
+                  for (let jj = 0; jj < bitcomEchoResults[i]['out'][j]['tape'].length; ++jj) {
+                    if (bitcomProtocols[bitcomEchoResults[i]['in'][0].e.a] === undefined) {
+                      bitcomProtocols[bitcomEchoResults[i]['in'][0].e.a] = {}
+                    }
+                    if (bitcomEchoResults[i]['out'][j]['tape'][jj]['cell'][4] !== undefined) {
+                      if (bitcomEchoResults[i]['out'][j]['tape'][jj]['cell'][0].s === "$" && bitcomEchoResults[i]['out'][j]['tape'][jj]['cell'][1].s === "echo" && bitcomEchoResults[i]['out'][j]['tape'][jj]['cell'][3].s === "to" && bitcomEchoResults[i]['out'][j]['tape'][jj]['cell'][4].s === "name") {
+                        let field = bitcomEchoResults[i]['out'][j]['tape'][jj]['cell'][4].s
+                        if (bitcomProtocols[bitcomEchoResults[i]['in'][0].e.a][field] === undefined) {
+                          bitcomProtocols[bitcomEchoResults[i]['in'][0].e.a][field] = bitcomEchoResults[i]['out'][j]['tape'][jj]['cell'][2].s
+                        }
+                      }
+                    }
                   }
                 }
               }
+              resolve(bitcomProtocols)
+              break;
             }
+
+            // Enqueue the next data chunk into our target stream
+            controller.enqueue(value);
           }
+
+          // Close the stream
+          controller.close();
+          reader.releaseLock();
         }
-        resolve(bitcomProtocols)
-      }
+      })
     })
     .catch(error => {
       reject(error)
@@ -65,280 +90,6 @@ var getBitcomProtocols =  function() {
     })
   });
 }
-
-var getOyoExternalLinkProtocols = function(listBaseApps, listMapApps, listRunApps) {
-  return new Promise(function(resolve, reject) {
-    Promise.all([
-      getOyoExternalLinkRankings("149xadSKJcKdhgE4sMmcvx421nsGYwgkWo", "default", ["default"]),
-      getOyoExternalLinkRankings("149xadSKJcKdhgE4sMmcvx421nsGYwgkWo", "base", listBaseApps),
-      getOyoExternalLinkRankings("149xadSKJcKdhgE4sMmcvx421nsGYwgkWo", "map", listMapApps),
-      getOyoExternalLinkRankings("149xadSKJcKdhgE4sMmcvx421nsGYwgkWo", "map", listRunApps)
-    ]).then(function(values) {
-      var returnValues = {}
-      returnValues.default = values[0].default
-      returnValues.base = values[1].base
-      returnValues.map = values[2].map
-      returnValues.run = values[3].run
-      resolve(returnValues)
-    }).catch(error => {
-      reject(error)
-      console.log(error)
-    })
-  })
-}
-var getOyoExternalLinkRankings = function(address, type, names) {
-  return new Promise(function(resolve, reject) {
-    var oyoLinks = {}
-    if (names.length === 0) {
-      oyoLinks[type] = {}
-      resolve(oyoLinks)
-    }
-
-    let endTimestamp = parseInt(new Date().getTime() / 1000)
-    let beginTimestamp = parseInt(endTimestamp - window.oyoProRankingPeriod)
-
-    let $or = []
-    for (let i = 0; i < names.length; ++i) {
-      $or.push({"out.s4": unescape(encodeURIComponent(names[i]))})
-    }
-
-    var query = {
-      "v": 3,
-      "q": {
-        "aggregate": [{
-          "$match": {
-            "$and": [{
-              "out.s2": address
-            }, {
-              "out.s3": type
-            }, {
-              $or
-            }, {
-              "out.s5": { "$regex" : "https?:\\/\\/.*\\{tx_hash\\}.*" }
-            }, {
-              "out.e.a": address
-            }, {
-              "$or": [{
-                "blk.t": {
-                      "$gte": beginTimestamp,
-                      "$lte": endTimestamp
-                    }
-                },
-                {"blk": null}
-              ]
-            }]
-          }
-        }, {
-          '$project': {
-            "out.s4":1, "out.s5": 1,
-            'satoshis': {
-              '$cond': {
-                'if': {
-                  '$eq': [{'$arrayElemAt': ['$out.e.a', 0]}, address]
-                },
-                'then': {
-                  '$arrayElemAt': ['$out.e.v', 0]
-                },
-                'else': {
-                  '$cond': {
-                    'if': {
-                      '$eq': [{'$arrayElemAt': ['$out.e.a', 1]}, address]
-                    },
-                    'then': {
-                      '$arrayElemAt': ['$out.e.v', 1]
-                    },
-                    'else': {
-                      '$cond': {
-                        'if': {
-                          '$eq': [{'$arrayElemAt': ['$out.e.a', 2]}, address]
-                        },
-                        'then': {
-                          '$arrayElemAt': ['$out.e.v', 2]
-                        },
-                        'else': 0
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }, {
-          "$group": {
-              "_id": {
-                "name": "$out.s4",
-                "url": "$out.s5"
-              },
-              "satoshis": {
-                "$sum": "$satoshis"
-              }
-          }
-        }],
-        "limit": 10000,
-        "sort": {"satoshis": -1}
-      }
-    }
-    let b64 = btoa(JSON.stringify(query))
-    let url = window.neongenesisNode + b64
-
-    let header
-    if (window.bitdbApiKey) {
-      header = { headers: { key: window.bitdbApiKey } }
-    }
-
-    fetch(url, header).then(function(r) {
-      return r.json()
-    }).then(response => {
-        if (response.c !== undefined || response.u !== undefined) {
-          let items = []
-          if (response.c !== undefined) {
-            items = items.concat(response.c)
-          }
-          if (response.u !== undefined) {
-            for (let i = 0; i < response.u.length; ++i) {
-              let added = 0
-              for (let j = 0; j < items.length; ++j) {
-                if (JSON.stringify(response.u[i]._id) === JSON.stringify(items[j]._id)) {
-                  items[j].satoshis += response.u[i].satoshis
-                  added = 1
-                }
-              }
-              if (added === 0) {
-                items = items.concat(response.u[i])
-                added = 1
-              }
-            }
-          }
-          // assign items here
-          oyoLinks[type] = {}
-          for (let i = 0; i < items.length; ++i) {
-            if (oyoLinks[type][items[i]._id.name] === undefined) {
-              oyoLinks[type][items[i]._id.name] = items[i]._id.url
-            }
-          }
-        }
-        resolve(oyoLinks)
-    }).catch(error => {
-      reject(error)
-      console.log(error)
-    })
-  })
-}
-/*
-var getOyoExternalLinkRankings = function(address, type, names) {
-  if (names.length === 0) {
-    return
-  }
-  let endTimestamp = parseInt(new Date().getTime() / 1000)
-  let beginTimestamp = parseInt(endTimestamp - window.oyoProRankingPeriod)
-
-  let queryMatch = {}
-  queryMatch['$and'] = []
-  queryMatch['$and'].push({"out.tape.cell": {"$all": [{"$elemMatch": {"i": 0, "s": address}}, {"$elemMatch": {"i": 1, "s": type}}, {"$elemMatch": {"i": 2, "s": {'$in': names}}}, {"$elemMatch": {"i": 3, "s": { "$regex" : "https?:\\/\\/.*\\{tx_hash\\}.*" }}}]}})
-  queryMatch['$and'].push({"out.e.a": address})
-  queryMatch['$and'].push({"$or": [{"blk.t": {"$gte": beginTimestamp, "$lte": endTimestamp}}, {"blk": null}]})
-  var query = {
-    "v": 3,
-    "q": {
-      "aggregate": [{
-          "$unwind": "$out"
-        },{
-          "$unwind": "$out.tape"
-        },{
-          "$match":  queryMatch
-        }, {
-        '$project': {
-          "nameCell":{'$arrayElemAt': ['$out.tape.cell', 2]},
-          "pathCell": {'$arrayElemAt': ['$out.tape.cell', 3]},
-          'satoshis': {
-            '$cond': {
-              'if': {
-                '$eq': [{'$arrayElemAt': ['$out.e.a', 0]}, address]
-              },
-              'then': {
-                '$arrayElemAt': ['$out.e.v', 0]
-              },
-              'else': {
-                '$cond': {
-                  'if': {
-                    '$eq': [{'$arrayElemAt': ['$out.e.a', 1]}, address]
-                  },
-                  'then': {
-                    '$arrayElemAt': ['$out.e.v', 1]
-                  },
-                  'else': {
-                    '$cond': {
-                      'if': {
-                        '$eq': [{'$arrayElemAt': ['$out.e.a', 2]}, address]
-                      },
-                      'then': {
-                        '$arrayElemAt': ['$out.e.v', 2]
-                      },
-                      'else': 0
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }, {
-        "$group": {
-            "_id": {
-              "name": "$nameCell.s",
-              "url": "$pathCell.s"
-            },
-            "satoshis": {
-              "$sum": "$satoshis"
-            }
-        }
-      }],
-      "limit": 10000,
-      "sort": {"satoshis": -1}
-    }
-  }
-  let b64 = btoa(JSON.stringify(query))
-  let url = window.bobNode + b64
-
-  let header
-  if (window.bitdbApiKey) {
-    header = { headers: { key: window.bitdbApiKey } }
-  }
-
-  fetch(url, header).then(function(r) {
-    return r.json()
-  }).then(response => {
-      if (response.c !== undefined || response.u !== undefined) {
-        let items = []
-        if (response.c !== undefined) {
-          items = items.concat(response.c)
-        }
-        if (response.u !== undefined) {
-          for (let i = 0; i < response.u.length; ++i) {
-            let added = 0
-            for (let j = 0; j < items.length; ++j) {
-              if (JSON.stringify(response.u[i]._id) === JSON.stringify(items[j]._id)) {
-                items[j].satoshis += response.u[i].satoshis
-                added = 1
-              }
-            }
-            if (added === 0) {
-              items = items.concat(response.u[i])
-              added = 1
-            }
-          }
-        }
-        // assign items here
-        oyoExternalLinks[type] = {}
-        for (let i = 0; i < items.length; ++i) {
-          if (oyoExternalLinks[type][items[i]._id.name] === undefined) {
-            oyoExternalLinks[type][items[i]._id.name] = items[i]._id.url
-          }
-        }
-      }
-  })
-}
-*/
 
 var searchQueryCreator = function(searchPhrase, beginTimestamp, endTimestamp) {
   let matchPhrase = searchPhrase

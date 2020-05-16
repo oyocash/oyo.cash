@@ -5,7 +5,7 @@ window.oyoProDefaultLink = "https://link.oyo.cash/?tx={tx_hash}"
 window.searchPeriodDefault = 30
 window.searchPeriod = window.searchPeriodDefault
 // bob planaria node
-window.bobNodeDefault = 'https://bob.planaria.network/q/1GgmC7Cg782YtQ6R9QkM58voyWeQJmJJzG/'
+window.bobNodeDefault = 'https://bob.bitbus.network/block/'
 window.bobNode = window.bobNodeDefault
 if (localStorage.getItem('bobNode')) {
   if (window.bobNodeDefault === localStorage.getItem('bobNode'))
@@ -16,7 +16,7 @@ if (localStorage.getItem('bobNode')) {
   }
 }
 // neongenesis planaria node
-window.neongenesisNodeDefault = 'https://neongenesis.bitdb.network/q/1HcBPzWoKDL2FhCMbocQmLuFTYsiD73u1j/'
+window.neongenesisNodeDefault = 'https://txo.bitbus.network/block/'
 window.neongenesisNode = window.neongenesisNodeDefault
 if (localStorage.getItem('neongenesisNode')) {
   if (window.neongenesisNodeDefault === localStorage.getItem('neongenesisNode'))
@@ -37,15 +37,15 @@ if (localStorage.getItem('bitsocketNode')) {
     window.bitsocketNode = localStorage.getItem('bitsocketNode')
   }
 }
-// bitdb api key
-window.bitdbApiKeyDefault = 'qpl84tsdqd6yxd3hpxhj5ngr3rp0pvlweqy7p7rzfy'
-window.bitdbApiKey = window.bitdbApiKeyDefault
-if (localStorage.getItem('bitdbApiKey')) {
-  if (window.bitdbApiKeyDefault === localStorage.getItem('bitdbApiKey'))
+// planaria token
+window.planariaTokenDefault = 'eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiIxS3NOWUE5Y0RHZ2tzcW5SUG1CVm9lQnl1RXpianFlaERLIiwiaXNzdWVyIjoiZ2VuZXJpYy1iaXRhdXRoIn0.SDZxQ08zN0tGVWE4VkFWTG9CQTgxNGlGZkNNTEhRSmRTdzZkb0dQZGp1cklhTU9KYXQ5Nmx6dVVwM09Xa3pCaXc5ZkJhejdvV0lOcHlnMEhpRVJlSnd3PQ'
+window.planariaToken = window.planariaTokenDefault
+if (localStorage.getItem('planariaToken')) {
+  if (window.planariaTokenDefault === localStorage.getItem('planariaToken'))
   {
-    localStorage.removeItem('bitdbApiKey')
+    localStorage.removeItem('planariaToken')
   } else {
-    window.bitdbApiKey = localStorage.getItem('bitdbApiKey')
+    window.planariaToken = localStorage.getItem('planariaToken')
   }
 }
 // block explorer rpc

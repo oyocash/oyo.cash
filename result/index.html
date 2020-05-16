@@ -413,45 +413,6 @@
     highlightArray = andSearchArray.concat(orSearchArray)
   }
 
-  var getMatchCount = function () {
-    var endTimestamp = parseInt(new Date().getTime() / 1000)
-    var beginTimestamp = endTimestamp - (window.searchPeriod * 24 * 60 * 60)
-    let queryMatch = searchQueryCreator(searchText, beginTimestamp, endTimestamp)
-    let query = {
-      'v': 3,
-      'q': {
-        'aggregate': [
-          {'$match': queryMatch},
-          {'$count': "count"}
-        ]
-      }
-    }
-
-    let b64 = btoa(JSON.stringify(query))
-    let url = window.bobNode + b64
-    let header
-    if (window.bitdbApiKey) {
-      header = {
-        headers: { key: window.bitdbApiKey }
-      }
-    }
-
-    fetch(url, header).then(function(r) {
-      return r.json()
-    }).then(response => {
-      var matchesCount = 0
-      if (response.c.length > 0) {
-        matchesCount = response.c[0].count
-      }
-      document.getElementById("resultsCount").innerHTML = "About " + matchesCount + " results";
-      pagination(Math.ceil(offset / window.resultsPerPage) + 1, Math.ceil(matchesCount / window.resultsPerPage))
-      matchPopulated = 1
-    })
-    .catch(error => {
-      console.log(error)
-    })
-  }
-
   var searchTheBlockchainForText = function() {
     var endTimestamp = parseInt(new Date().getTime() / 1000)
     var beginTimestamp = endTimestamp - (window.searchPeriod * 24 * 60 * 60)
@@ -461,102 +422,56 @@
       'q': {
         'find': queryMatch,
         'skip': parseInt(offset),
-        'limit': window.resultsPerPage
+        'limit': window.resultsPerPage,
+        'sort': { 'blk.i': -1 }
       }
     }
 
-    let b64 = btoa(JSON.stringify(query))
-    let url = window.bobNode + b64
-
-    let header
-    if (window.bitdbApiKey) {
-      header = {
-        headers: { key: window.bitdbApiKey }
-      }
+    let fetchParams = {
+      method: "post",
+      headers: {
+        'Content-type': 'application/json; charset=utf-8',
+        'token': window.planariaToken,
+        "format": "json"
+      },
+      body: JSON.stringify(query)
     }
 
-    fetch(url, header).then(function(r) {
-      return r.json()
-    }).then(response => {
-      resultAllItems = response.u.concat(response.c)
+    var fetchResponse = ""
+    const decoder = new TextDecoder('utf-8');
 
-      for (let i = 0; i < resultAllItems.length; ++i) {
-        for (let ii = 0; ii < resultAllItems[i]['out'].length; ++ii) {
-          for (let iii = 0; iii < resultAllItems[i]['out'][ii]['tape'].length; ++iii) {
-            //populate listBaseApps
-            let prefix = resultAllItems[i]['out'][ii]['tape'][iii]['cell'][0].s
-            if (prefix !== undefined && !(listBaseApps.includes(prefix))) {
-              listBaseApps.push(prefix)
-            }
-            //populate BitcomPrefix
-            if (!(bitcomPrefixes.includes(prefix)) && protocols[prefix] === undefined) {
-              try {
-                bchaddr.isLegacyAddress(prefix)
-                bitcomPrefixes.push(prefix)
-              } catch (e) {
-              }
+    fetch(window.bobNode, fetchParams)
+    // Retrieve its body as ReadableStream
+    .then(response => response.body)
+    .then(rs => {
+      const reader = rs.getReader();
+
+      return new ReadableStream({
+        async start(controller) {
+          while (true) {
+            const { done, value } = await reader.read();
+
+            if (value) {
+              var decoded = decoder.decode(value);
+              fetchResponse = fetchResponse.concat(decoded);
             }
 
-            //populate MapApps
-            let thisOut = resultAllItems[i]['out'][ii]['tape'][iii]
-            if (thisOut['cell'][5] !== undefined && thisOut['cell'][5].s !== undefined && thisOut['cell'][4].s === 'app') {
-              resultApps[i] = thisOut['cell'][5].s
-            }
-            if (thisOut['cell'][7] !== undefined && thisOut['cell'][7].s !== undefined && thisOut['cell'][6].s === 'app') {
-              resultApps[i] = thisOut['cell'][7].s
-            }
-            if (thisOut['cell'][9] !== undefined && thisOut['cell'][9].s !== undefined && thisOut['cell'][8].s === 'app') {
-              resultApps[i] = thisOut['cell'][9].s
-            }
-            if (thisOut['cell'][11] !== undefined && thisOut['cell'][11].s !== undefined && thisOut['cell'][10].s === 'app') {
-              resultApps[i] = thisOut['cell'][11].s
-            }
-            if (thisOut['cell'][13] !== undefined && thisOut['cell'][13].s !== undefined && thisOut['cell'][12].s === 'app') {
-              resultApps[i] = thisOut['cell'][13].s
-            }
-            if (thisOut['cell'][15] !== undefined && thisOut['cell'][15].s !== undefined && thisOut['cell'][14].s === 'app') {
-              resultApps[i] = thisOut['cell'][15].s
-            }
-            if (thisOut['cell'][17] !== undefined && thisOut['cell'][17].s !== undefined && thisOut['cell'][16].s === 'app') {
-              resultApps[i] = thisOut['cell'][17].s
-            }
-            if (thisOut['cell'][19] !== undefined && thisOut['cell'][19].s !== undefined && thisOut['cell'][18].s === 'app') {
-              resultApps[i] = thisOut['cell'][19].s
-            }
-            if (thisOut['cell'][21] !== undefined && thisOut['cell'][21].s !== undefined && thisOut['cell'][20].s === 'app') {
-              resultApps[i] = thisOut['cell'][21].s
+            // When no more data needs to be consumed, break the reading
+            if (done) {
+              resultAllItems = JSON.parse(fetchResponse)
+              consumeItems()
+              break;
             }
 
-            //populate RunApps
-            if (thisOut['cell'][4] !== undefined && thisOut['cell'][4].s !== undefined && thisOut['cell'][2].s === 'run') {
-              resultApps[i] = thisOut['cell'][3].s
-            }
+            // Enqueue the next data chunk into our target stream
+            controller.enqueue(value);
           }
-        }
-      }
-      Promise.all([getOyoExternalLinkProtocols(listBaseApps, listMapApps, listRunApps), getBitcomProtocols()]).then(function(values) {
-        oyoExternalLinks = values[0]
-        bitcomProtocols = values[1]
 
-        for (let key in bitcomProtocols) {
-          if (!bitcomProtocols.hasOwnProperty(key)) continue;
-          let bitcomProtocol = bitcomProtocols[key]
-          if (protocols[key] === undefined) {
-            let protocol = {}
-            if (bitcomProtocol['name'] !== undefined) {
-              protocol['name'] = bitcomProtocol['name']
-            }
-            if (oyoExternalLinks['base'][key] !== undefined) {
-              protocol['link'] = oyoExternalLinks['base'][key][0]
-            }
-            if (protocol['name'] || protocol['link']) {
-              protocols[key] = protocol
-            }
-          }
+          // Close the stream
+          controller.close();
+          reader.releaseLock();
         }
-
-        populateResults()
-      });
+      })
     })
     .catch(error => {
       document.getElementById("loading").style.display = "none";
@@ -566,13 +481,89 @@
     })
   }
 
+  var consumeItems = function () {
+    for (let i = 0; i < resultAllItems.length; ++i) {
+      for (let ii = 0; ii < resultAllItems[i]['out'].length; ++ii) {
+        for (let iii = 0; iii < resultAllItems[i]['out'][ii]['tape'].length; ++iii) {
+          //populate listBaseApps
+          let prefix = resultAllItems[i]['out'][ii]['tape'][iii]['cell'][0].s
+          if (prefix !== undefined && !(listBaseApps.includes(prefix))) {
+            listBaseApps.push(prefix)
+          }
+          //populate BitcomPrefix
+          if (!(bitcomPrefixes.includes(prefix)) && protocols[prefix] === undefined) {
+            try {
+              bchaddr.isLegacyAddress(prefix)
+              bitcomPrefixes.push(prefix)
+            } catch (e) {
+            }
+          }
+
+          //populate MapApps
+          let thisOut = resultAllItems[i]['out'][ii]['tape'][iii]
+          if (thisOut['cell'][5] !== undefined && thisOut['cell'][5].s !== undefined && thisOut['cell'][4].s === 'app') {
+            resultApps[i] = thisOut['cell'][5].s
+          }
+          if (thisOut['cell'][7] !== undefined && thisOut['cell'][7].s !== undefined && thisOut['cell'][6].s === 'app') {
+            resultApps[i] = thisOut['cell'][7].s
+          }
+          if (thisOut['cell'][9] !== undefined && thisOut['cell'][9].s !== undefined && thisOut['cell'][8].s === 'app') {
+            resultApps[i] = thisOut['cell'][9].s
+          }
+          if (thisOut['cell'][11] !== undefined && thisOut['cell'][11].s !== undefined && thisOut['cell'][10].s === 'app') {
+            resultApps[i] = thisOut['cell'][11].s
+          }
+          if (thisOut['cell'][13] !== undefined && thisOut['cell'][13].s !== undefined && thisOut['cell'][12].s === 'app') {
+            resultApps[i] = thisOut['cell'][13].s
+          }
+          if (thisOut['cell'][15] !== undefined && thisOut['cell'][15].s !== undefined && thisOut['cell'][14].s === 'app') {
+            resultApps[i] = thisOut['cell'][15].s
+          }
+          if (thisOut['cell'][17] !== undefined && thisOut['cell'][17].s !== undefined && thisOut['cell'][16].s === 'app') {
+            resultApps[i] = thisOut['cell'][17].s
+          }
+          if (thisOut['cell'][19] !== undefined && thisOut['cell'][19].s !== undefined && thisOut['cell'][18].s === 'app') {
+            resultApps[i] = thisOut['cell'][19].s
+          }
+          if (thisOut['cell'][21] !== undefined && thisOut['cell'][21].s !== undefined && thisOut['cell'][20].s === 'app') {
+            resultApps[i] = thisOut['cell'][21].s
+          }
+
+          //populate RunApps
+          if (thisOut['cell'][4] !== undefined && thisOut['cell'][4].s !== undefined && thisOut['cell'][2].s === 'run') {
+            resultApps[i] = thisOut['cell'][3].s
+          }
+        }
+      }
+    }
+    Promise.all([getBitcomProtocols()]).then(function(values) {
+      bitcomProtocols = values[0]
+
+      for (let key in bitcomProtocols) {
+        if (!bitcomProtocols.hasOwnProperty(key)) continue;
+        let bitcomProtocol = bitcomProtocols[key]
+        if (protocols[key] === undefined) {
+          let protocol = {}
+          if (bitcomProtocol['name'] !== undefined) {
+            protocol['name'] = bitcomProtocol['name']
+          }
+          if (protocol['name'] || protocol['link']) {
+            protocols[key] = protocol
+          }
+        }
+      }
+
+      populateResults()
+    });
+  }
+
   var populateResults = function() {
     for (let i = 0; i < resultAllItems.length; i++) {
       addListItem("resultsList", i, resultAllItems[i])
     }
-    if (matchPopulated === 0) {
-      pagination(Math.ceil(offset / window.resultsPerPage) + 1, 100)
-    }
+    // populate pagination
+    pagination(resultAllItems.length, offset)
+
     // show loaded
     document.getElementById("loading").style.display = "none";
     document.getElementById("error").style.display = "none";
@@ -637,60 +628,36 @@
     itemDiv.appendChild(row2).appendChild(sDetailOuterDiv).appendChild(sDetail)
     document.getElementById(parentElementId).appendChild(itemDiv)
   }
-  var pagination =  function(c, m) {
+
+
+  var pagination =  function(itemsNumber, offset) {
     var paginationDiv = document.createElement("div");
     paginationDiv.className = "pagination";
 
-    var current = c,
-        last = m,
-        delta = 3,
-        left = current - delta,
-        right = current + delta + 1,
-        range = [],
-        rangeWithDots = [],
-        l;
-
-    for (let i = 1; i <= last; i++) {
-      if (i == 1 || i == last || i >= left && i < right) {
-          range.push(i);
-      }
-    }
-
-    for (let i of range) {
-      if (l) {
-        if (i - l === 2) {
-          rangeWithDots.push(l + 1);
-          var a = document.createElement("a");
-          a.setAttribute("href", "/result/?search=" + btoa(searchText) + "&offset=" + (l) * window.resultsPerPage);
-          a.className = "page-item"
-          var linkTextNode = document.createTextNode(l + 1);
-          a.appendChild(linkTextNode);
-          paginationDiv.appendChild(a);
-        } else if (i - l !== 1) {
-          rangeWithDots.push('...');
-          var a = document.createElement("a");
-          a.className = "page-item"
-          var linkTextNode = document.createTextNode("...");
-          a.appendChild(linkTextNode);
-          paginationDiv.appendChild(a);
-        }
-      }
-      rangeWithDots.push(i);
+    if (offset > 0) {
       var a = document.createElement("a");
-      a.setAttribute("href", "/result/?search=" + btoa(searchText) + "&offset=" + (i -1) * window.resultsPerPage);
+      a.setAttribute("href", "/result/?search=" + btoa(searchText) + "&offset=" + (parseInt(offset) - window.resultsPerPage));
       a.className = "page-item"
-      if (i === c) {
-        a.className += " active-item"
-      }
-      var linkTextNode = document.createTextNode(i);
+      var linkTextNode = document.createTextNode("Previous");
       a.appendChild(linkTextNode);
       paginationDiv.appendChild(a);
-      l = i;
     }
+
+    if (itemsNumber > 0 && itemsNumber % window.resultsPerPage === 0) {
+
+      var a = document.createElement("a");
+      a.setAttribute("href", "/result/?search=" + btoa(searchText) + "&offset=" +  (parseInt(offset) + window.resultsPerPage));
+      a.className = "page-item"
+      var linkTextNode = document.createTextNode("Next");
+      a.appendChild(linkTextNode);
+      paginationDiv.appendChild(a);
+    }
+
+
 
     document.getElementById("pagination").innerHTML = ""
     document.getElementById("pagination").appendChild(paginationDiv)
-    return rangeWithDots;
+    return
   }
 
   document.addEventListener("DOMContentLoaded", function() {
@@ -720,7 +687,6 @@
 
     // populate results
     computeSearchArray()
-    getMatchCount()
     searchTheBlockchainForText()
   })
 </script>
