@@ -626,6 +626,28 @@
       paginationDiv.appendChild(a);
     }
 
+    if (itemsNumber === 0 || itemsNumber % window.resultsPerPage !== 0) {
+      var endTimestamp, dateForm
+      if (searchText.includes("datetime:")) {
+        let match = searchText.match(/(?:^|\s+)datetime:\s*(\S+)\s*/u)
+        if (match && match[1]) {
+          let endDate = new Date(Date.UTC(match[1].substring(0,4), parseInt(match[1].substring(4,6)) - 1, match[1].substring(6,8), 23, 59, 59, 0))
+          endTimestamp = parseInt(endDate.getTime() / 1000) + 1
+        }
+      } else {
+        endTimestamp = parseInt(new Date().getTime() / 1000)
+      }
+      endTimestamp = endTimestamp - (periodInput * 24 * 60 * 60)
+      searchText = searchText.replace(/(?:^|\s+)datetime:\s*(\S+)\s*/u, "")
+      searchText = searchText + " datetime:" + new Date(endTimestamp * 1000).toISOString().substring(0, 4) + new Date(endTimestamp * 1000).toISOString().substring(5, 7) + new Date(endTimestamp * 1000).toISOString().substring(8, 10) + "2359"
+
+      var a = document.createElement("a");
+      a.setAttribute("href", "/result/?search=" + btoa(searchText) + "&offset=0");
+      a.className = "page-item"
+      var linkTextNode = document.createTextNode("Next");
+      a.appendChild(linkTextNode);
+      paginationDiv.appendChild(a);
+    }
 
 
     document.getElementById("pagination").innerHTML = ""
