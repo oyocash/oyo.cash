@@ -34,9 +34,9 @@
   <meta name="bitcoin-address" content="1JFAFvfWZauvVWKFsFtVomEQrPAHqEr1X8">
 
   <script src="/assets/js/loader.js"></script>
-  <script src="/assets/js/loadVars.js?190201"></script>
+  <script src="/assets/js/loadVars.js?200501"></script>
   <script src="/assets/js/common.js"></script>
-  <script src="/assets/js/bob.js?190201"></script>
+  <script src="/assets/js/bob.js?200501"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js" integrity="sha256-4iQZ6BVL4qNKlQ27TExEhBN1HFPvAvAMbFavKKosSWQ=" crossorigin="anonymous"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" integrity="sha256-Uv9BNBucvCPipKQ2NS9wYpJmi8DTOEfTA/nH2aoJALw=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pikaday/1.8.0/pikaday.min.js" integrity="sha256-+B1vOR24Jpk4oWE/+SWu7AxoQqrqDT4SF+12bixBdjw=" crossorigin="anonymous"></script>
@@ -268,32 +268,7 @@
   }
 
   var getLink = function (item, outIndex, tapeIndex, index) {
-    let link = ''
-    if (protocols[item.out[outIndex].tape[tapeIndex].cell[0].b] && protocols[item.out[outIndex].tape[tapeIndex].cell[0].b].link) {
-      link = protocols[item.out[outIndex].tape[tapeIndex].cell[0].b].link
-    } else if (protocols[item.out[outIndex].tape[tapeIndex].cell[0].s] && protocols[item.out[outIndex].tape[tapeIndex].cell[0].s].link) {
-      link = protocols[item.out[outIndex].tape[tapeIndex].cell[0].s].link
-    }
-
-    if (link === '') {
-      if (oyoExternalLinks["map"] !== undefined && resultApps[index] !== undefined && oyoExternalLinks["map"][resultApps[index]] !== undefined) {
-        link = oyoExternalLinks["map"][resultApps[index]][0]
-      } else if (oyoExternalLinks["run"] !== undefined && resultApps[index] !== undefined && oyoExternalLinks["run"][resultApps[index]] !== undefined) {
-        link = oyoExternalLinks["run"][resultApps[index]][0]
-      } else if (oyoExternalLinks["base"] !== undefined && resultApps[index] !== undefined && oyoExternalLinks["base"][resultApps[index]] !== undefined) {
-        if (item.out[outIndex].tape[tapeIndex].cell[0].b.length <= 6 && oyoExternalLinks["base"][item.out[outIndex].tape[tapeIndex].cell[0].b]) {
-          link = oyoExternalLinks["base"][item.out[outIndex].tape[tapeIndex].cell[0].b][0]
-        } else if (oyoExternalLinks["base"][item.out[outIndex].tape[tapeIndex].cell[0].s]) {
-          link = oyoExternalLinks["base"][item.out[outIndex].tape[tapeIndex].cell[0].s][0]
-        }
-      } else if (oyoExternalLinks["default"] !== undefined) {
-        if (oyoExternalLinks["default"]["default"] === undefined || oyoExternalLinks["default"]["default"][0] === undefined) {
-          link = window.oyoProDefaultLink
-        } else {
-          link = oyoExternalLinks["default"]["default"][0]
-        }
-      }
-    }
+    let link = window.oyoProDefaultLink
     //replace {tx_hash}
     link = link.replace("{tx_hash}", item.tx.h)
     return link
@@ -418,7 +393,6 @@
     var beginTimestamp = endTimestamp - (window.searchPeriod * 24 * 60 * 60)
     let queryMatch = searchQueryCreator(searchText, beginTimestamp, endTimestamp)
     let query = {
-      'v': 3,
       'q': {
         'find': queryMatch,
         'skip': parseInt(offset),
@@ -644,7 +618,6 @@
     }
 
     if (itemsNumber > 0 && itemsNumber % window.resultsPerPage === 0) {
-
       var a = document.createElement("a");
       a.setAttribute("href", "/result/?search=" + btoa(searchText) + "&offset=" +  (parseInt(offset) + window.resultsPerPage));
       a.className = "page-item"
