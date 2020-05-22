@@ -50,17 +50,13 @@
     <div class="grid">
       <div class="s_results" id="loaded">
         <div class="periodNav">
-          <div class="periodNavLeft">Period:
-            <button class="periodButton" value="7">7d</button>
-            <button class="periodButton" value="30">1m</button>
-            <button class="periodButton" value="90">3m</button>
-            <button class="periodButton" value="365">1y</button>
+          <div class="periodNavLeft">
+            From: <input type="text" name="startDateForm" id="startDateForm" title="Search date start" placeholder="YYYY-MM-DD" disabled/>
+            To: <input type="text" name="endDateForm" id="endDateForm" title="Search date end" placeholder="YYYY-MM-DD"/>
           </div>
           <div class="periodNavCenter">
           </div>
           <div class="periodNavRight">
-            From: <input type="text" name="startDateForm" id="startDateForm" title="Search date start" placeholder="YYYY-MM-DD" disabled/>
-            To: <input type="text" name="endDateForm" id="endDateForm" title="Search date end" placeholder="YYYY-MM-DD"/>
           </div>
         </div>
         <div class="n_results" id="resultsCount"></div>
@@ -110,7 +106,8 @@
   var listMapApps = []
   var listRunApps = []
   var bitcomProtocols = {}
-  var oyoExternalLinks = []
+  var searchEndTimestamp
+  var nextDateSearchesCount = 0
   var protocols = JSON.parse(window.protocols)
   var picker = new Pikaday(
   {
@@ -388,9 +385,17 @@
     highlightArray = andSearchArray.concat(orSearchArray)
   }
 
-  var searchTheBlockchainForText = function() {
-    var endTimestamp = parseInt(new Date().getTime() / 1000)
-    var beginTimestamp = endTimestamp - (window.searchPeriod * 24 * 60 * 60)
+  var searchTheBlockchainForText = function(beginTimestamp, endTimestamp) {
+    if (endTimestamp === undefined) {
+      endTimestamp = parseInt(new Date().getTime() / 1000)
+    }
+    searchEndTimestamp = endTimestamp
+    if (beginTimestamp === undefined) {
+      beginTimestamp = beginTimestamp || endTimestamp - (window.searchPeriod * 24 * 60 * 60)
+    }
+console.log(beginTimestamp)
+console.log(endTimestamp)
+
     let queryMatch = searchQueryCreator(searchText, beginTimestamp, endTimestamp)
     let query = {
       'q': {
@@ -433,7 +438,7 @@
             // When no more data needs to be consumed, break the reading
             if (done) {
               resultAllItems = JSON.parse(fetchResponse)
-              consumeItems()
+              consumeItems(beginTimestamp, endTimestamp)
               break;
             }
 
@@ -455,7 +460,7 @@
     })
   }
 
-  var consumeItems = function () {
+  var consumeItems = function (beginTimestamp, endTimestamp) {
     for (let i = 0; i < resultAllItems.length; ++i) {
       for (let ii = 0; ii < resultAllItems[i]['out'].length; ++ii) {
         for (let iii = 0; iii < resultAllItems[i]['out'][ii]['tape'].length; ++iii) {
@@ -527,14 +532,32 @@
         }
       }
 
-      populateResults()
+      populateResults(beginTimestamp, endTimestamp)
     });
   }
 
-  var populateResults = function() {
+  var populateResults = function(beginTimestamp, endTimestamp) {
+    if (resultAllItems.length === 0 && nextDateSearchesCount < 25) {
+      endTimestamp = endTimestamp - (periodInput * 24 * 60 * 60)
+      beginTimestamp = beginTimestamp - (periodInput * 24 * 60 * 60)
+
+      var startDateForm = new Date(beginTimestamp * 1000).toISOString().substring(0, 10)
+      document.getElementById('startDateForm').value = startDateForm
+
+      nextDateSearchesCount += 1
+      searchTheBlockchainForText(beginTimestamp, endTimestamp)
+      return
+    }
+
     for (let i = 0; i < resultAllItems.length; i++) {
       addListItem("resultsList", i, resultAllItems[i])
     }
+
+    if (resultAllItems.length === 0) {
+      var textNode = document.createTextNode("No results found");
+      document.getElementById("resultsList").appendChild(textNode)
+    }
+
     // populate pagination
     pagination(resultAllItems.length, offset)
 
@@ -626,20 +649,11 @@
       paginationDiv.appendChild(a);
     }
 
-    if (itemsNumber === 0 || itemsNumber % window.resultsPerPage !== 0) {
-      var endTimestamp, dateForm
-      if (searchText.includes("datetime:")) {
-        let match = searchText.match(/(?:^|\s+)datetime:\s*(\S+)\s*/u)
-        if (match && match[1]) {
-          let endDate = new Date(Date.UTC(match[1].substring(0,4), parseInt(match[1].substring(4,6)) - 1, match[1].substring(6,8), 23, 59, 59, 0))
-          endTimestamp = parseInt(endDate.getTime() / 1000) + 1
-        }
-      } else {
-        endTimestamp = parseInt(new Date().getTime() / 1000)
-      }
+    if (itemsNumber % window.resultsPerPage !== 0) {
+      var endTimestamp = searchEndTimestamp
       endTimestamp = endTimestamp - (periodInput * 24 * 60 * 60)
       searchText = searchText.replace(/(?:^|\s+)datetime:\s*(\S+)\s*/u, "")
-      searchText = searchText + " datetime:" + new Date(endTimestamp * 1000).toISOString().substring(0, 4) + new Date(endTimestamp * 1000).toISOString().substring(5, 7) + new Date(endTimestamp * 1000).toISOString().substring(8, 10) + "2359"
+      searchText = searchText + " datetime:" + new Date(endTimestamp * 1000).toISOString().substring(0, 4) + new Date(endTimestamp * 1000).toISOString().substring(5, 7) + new Date(endTimestamp * 1000).toISOString().substring(8, 10) + new Date(endTimestamp * 1000).toISOString().substring(11, 13) + new Date(endTimestamp * 1000).toISOString().substring(14, 16)
 
       var a = document.createElement("a");
       a.setAttribute("href", "/result/?search=" + btoa(searchText) + "&offset=0");
@@ -648,7 +662,6 @@
       a.appendChild(linkTextNode);
       paginationDiv.appendChild(a);
     }
-
 
     document.getElementById("pagination").innerHTML = ""
     document.getElementById("pagination").appendChild(paginationDiv)
