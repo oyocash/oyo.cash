@@ -106,7 +106,6 @@
   var listMapApps = []
   var listRunApps = []
   var bitcomProtocols = {}
-  var searchEndTimestamp
   var nextDateSearchesCount = 0
   var protocols = JSON.parse(window.protocols)
   var picker = new Pikaday(
@@ -133,7 +132,7 @@
   if (searchText.includes("datetime:")) {
     let match = searchText.match(/(?:^|\s+)datetime:\s*(\S+)\s*/u)
     if (match && match[1]) {
-      let endDate = new Date(Date.UTC(match[1].substring(0,4), parseInt(match[1].substring(4,6)) - 1, match[1].substring(6,8), 23, 59, 59, 0))
+      let endDate = new Date(Date.UTC(match[1].substring(0,4), parseInt(match[1].substring(4,6)) - 1, match[1].substring(6,8), match[1].substring(8,10), match[1].substring(10,12), 59, 0))
       endTimestamp = parseInt(endDate.getTime() / 1000) + 1
       dateForm = endDate.toISOString().substring(0, 10)
     }
@@ -141,6 +140,7 @@
     endTimestamp = parseInt(new Date().getTime() / 1000)
     dateForm = new Date().toISOString().substring(0, 10)
   }
+  var searchEndTimestamp = endTimestamp
   document.getElementById('endDateForm').value = dateForm
   var startDateTimestamp = endTimestamp - (periodInput * 24 * 60 * 60)
   var startDateForm = new Date(startDateTimestamp * 1000).toISOString().substring(0, 10)
@@ -389,12 +389,13 @@
     if (endTimestamp === undefined) {
       endTimestamp = parseInt(new Date().getTime() / 1000)
     }
-    searchEndTimestamp = endTimestamp
+    console.log("searchEndTimestamp: " + searchEndTimestamp)
     if (beginTimestamp === undefined) {
       beginTimestamp = beginTimestamp || endTimestamp - (window.searchPeriod * 24 * 60 * 60)
     }
-console.log(beginTimestamp)
-console.log(endTimestamp)
+
+    console.log(endTimestamp);
+    console.log(beginTimestamp);
 
     let queryMatch = searchQueryCreator(searchText, beginTimestamp, endTimestamp)
     let query = {
@@ -653,12 +654,14 @@ console.log(endTimestamp)
       var endTimestamp = searchEndTimestamp
       endTimestamp = endTimestamp - (periodInput * 24 * 60 * 60)
       searchText = searchText.replace(/(?:^|\s+)datetime:\s*(\S+)\s*/u, "")
-      searchText = searchText + " datetime:" + new Date(endTimestamp * 1000).toISOString().substring(0, 4) + new Date(endTimestamp * 1000).toISOString().substring(5, 7) + new Date(endTimestamp * 1000).toISOString().substring(8, 10) + new Date(endTimestamp * 1000).toISOString().substring(11, 13) + new Date(endTimestamp * 1000).toISOString().substring(14, 16)
+      var endDate = new Date(endTimestamp * 1000).toISOString()
+      searchText = searchText + " datetime: " + endDate.substring(0, 4) + endDate.substring(5, 7) + endDate.substring(8, 10)
+       + endDate.substring(11, 13) + endDate.substring(14, 16)
 
       var a = document.createElement("a");
       a.setAttribute("href", "/result/?search=" + btoa(searchText) + "&offset=0");
       a.className = "page-item"
-      var linkTextNode = document.createTextNode("Next");
+      var linkTextNode = document.createTextNode("Next " + endDate);
       a.appendChild(linkTextNode);
       paginationDiv.appendChild(a);
     }
