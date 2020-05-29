@@ -389,13 +389,9 @@
     if (endTimestamp === undefined) {
       endTimestamp = parseInt(new Date().getTime() / 1000)
     }
-    console.log("searchEndTimestamp: " + searchEndTimestamp)
     if (beginTimestamp === undefined) {
       beginTimestamp = beginTimestamp || endTimestamp - (window.searchPeriod * 24 * 60 * 60)
     }
-
-    console.log(endTimestamp);
-    console.log(beginTimestamp);
 
     let queryMatch = searchQueryCreator(searchText, beginTimestamp, endTimestamp)
     let query = {
@@ -661,7 +657,7 @@
       var a = document.createElement("a");
       a.setAttribute("href", "/result/?search=" + btoa(searchText) + "&offset=0");
       a.className = "page-item"
-      var linkTextNode = document.createTextNode("Next " + endDate);
+      var linkTextNode = document.createTextNode("Next");
       a.appendChild(linkTextNode);
       paginationDiv.appendChild(a);
     }
